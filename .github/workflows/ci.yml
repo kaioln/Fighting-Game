@@ -79,7 +79,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Dependências
-        run: sudo apt-get update && sudo apt-get install -y libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl1-mesa-dev xvfb mesa-utils
+        run: sudo apt-get update && sudo apt-get install -y libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl1-mesa-dev xvfb mesa-utils imagemagick
       - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DFG_BUILD_GAME=ON
       - run: cmake --build build --parallel --target fgjogo
       # Modelo de teste: robot.glb (Quaternius, CC0) que acompanha o código-fonte da raylib. Só para a CI.
