@@ -475,6 +475,7 @@ struct ClipRef {
 
 struct CharacterLook {
   std::string model_path;
+  std::vector<std::string> anim_files;  // arquivos extras com clipes no mesmo esqueleto
   float scale = 1.0f;
   float yaw_offset = 0.0f;
   Color tint = WHITE;
@@ -484,6 +485,7 @@ struct CharacterLook {
 
 struct ArenaLook {
   std::string model_path;
+  std::string sky_path;  // imagem equirretangular de céu (opcional)
   float scale = 1.0f;
   Vector3 offset = {0, 0, 0};
   Color sky = {120, 140, 160, 255};
@@ -535,6 +537,9 @@ bool load_character_look(const std::string& path, CharacterLook& look, std::stri
   look.scale = milli(root.find("scale_milli"), 1.0f);
   look.yaw_offset = milli(root.find("yaw_offset_milli_deg"), 0.0f);
   look.tint = read_color(root.find("tint"), WHITE);
+  if (const auto* a = root.find("animations"); a && a->is_array())
+    for (const auto& it : a->items())
+      if (it.is_string()) look.anim_files.push_back(it.as_string());
   if (const auto* s = root.find("states"); s && s->is_object())
     for (const auto& [k, v] : s->members()) look.states.emplace_back(k, read_clip(v));
   if (const auto* s = root.find("moves"); s && s->is_object())
@@ -554,6 +559,7 @@ bool load_arena_look(const std::string& path, ArenaLook& look, std::string& err)
   if (const auto* o = root.find("offset_mm"); o && o->is_array() && o->items().size() == 3)
     look.offset = {static_cast<float>(o->items()[0].as_int()) / 1000.0f, static_cast<float>(o->items()[1].as_int()) / 1000.0f,
                    static_cast<float>(o->items()[2].as_int()) / 1000.0f};
+  if (const auto* m = root.find("sky_image"); m && m->is_string()) look.sky_path = m->as_string();
   look.sky = read_color(root.find("sky"), look.sky);
   look.fog = read_color(root.find("fog"), look.sky);
   return true;
@@ -592,17 +598,26 @@ void main() {
 struct Fighter3D {
   bool loaded = false;
   Model model{};
-  ModelAnimation* anims = nullptr;
+  ModelAnimation* anims = nullptr;  // clipes do próprio modelo
   int anim_count = 0;
+  std::vector<std::pair<ModelAnimation*, int>> extra;  // arquivos extras (descarregados no fim)
+  std::vector<ModelAnimation> all;                      // todos os clipes, para busca
   CharacterLook look;
   // estado de reprodução (somente apresentação)
   std::string current_key;
   int local_frame = 0;
 
   int find_anim(const std::string& name) const {
-    for (int i = 0; i < anim_count; ++i)
-      if (name == anims[i].name) return i;
+    for (size_t i = 0; i < all.size(); ++i)
+      if (name == all[i].name) return static_cast<int>(i);
     return -1;
+  }
+  void unload() {
+    if (!loaded) return;
+    if (anims) UnloadModelAnimations(anims, anim_count);
+    for (auto& [a, n] : extra) UnloadModelAnimations(a, n);
+    UnloadModel(model);
+    loaded = false;
   }
   const ClipRef* clip_for(const std::vector<std::pair<std::string, ClipRef>>& table, const std::string& key) const {
     for (const auto& [k, v] : table)
@@ -662,7 +677,7 @@ const char* fallback(const std::string& key) {
 }
 
 void animate(Fighter3D& g, const App& a, int p) {
-  if (!g.loaded || g.anim_count == 0) return;
+  if (!g.loaded || g.all.empty()) return;
   const FighterState& f = a.state.f[p];
   std::string key = state_key(a.state, p);
   const ClipRef* ref = nullptr;
@@ -692,7 +707,7 @@ void animate(Fighter3D& g, const App& a, int p) {
   if (!ref) return;
   const int ai = g.find_anim(ref->clip);
   if (ai < 0) return;
-  const ModelAnimation& anim = g.anims[ai];
+  const ModelAnimation& anim = g.all[static_cast<size_t>(ai)];
   const int n = std::max(1, anim.frameCount);
   int frame = 0;
   if (m && key.rfind("move:", 0) == 0) {
@@ -1002,16 +1017,14 @@ int main(int argc, char** argv) {
   ArenaLook arena_look;
   Model arena{};
   bool arena_loaded = false;
+  Texture2D sky_tex{};
   std::vector<std::string> art_missing;
   const std::string assets_dir = join_path(base_dir, "assets");
   const std::string pres_dir = join_path(join_path(base_dir, "data"), "presentation");
 
   auto load_fighter = [&](int p) {
     Fighter3D& g = fighters[p];
-    if (g.loaded) {
-      if (g.anims) UnloadModelAnimations(g.anims, g.anim_count);
-      UnloadModel(g.model);
-    }
+    g.unload();
     g = Fighter3D{};
     const std::string id = app.data.characters[static_cast<size_t>(app.setup.character[p])].id;
     std::string err;
@@ -1026,6 +1039,20 @@ int main(int argc, char** argv) {
     }
     g.model = LoadModel(path.c_str());
     g.anims = LoadModelAnimations(path.c_str(), &g.anim_count);
+    for (int i = 0; i < g.anim_count; ++i) g.all.push_back(g.anims[i]);
+    for (const auto& f : g.look.anim_files) {
+      const std::string ap = join_path(assets_dir, f);
+      int n = 0;
+      ModelAnimation* an = FileExists(ap.c_str()) ? LoadModelAnimations(ap.c_str(), &n) : nullptr;
+      if (!an) {
+        art_missing.push_back("animações não encontradas: " + ap);
+        continue;
+      }
+      g.extra.emplace_back(an, n);
+      for (int i = 0; i < n; ++i) {
+        if (an[i].boneCount == g.model.boneCount) g.all.push_back(an[i]);
+      }
+    }
     apply_shader(g.model, lit);
     g.loaded = g.model.meshCount > 0;
     if (!g.loaded) art_missing.push_back("modelo inválido: " + path);
@@ -1043,6 +1070,13 @@ int main(int argc, char** argv) {
         arena_loaded = arena.meshCount > 0;
       } else {
         art_missing.push_back("arena não encontrada: " + path);
+      }
+      if (!arena_look.sky_path.empty()) {
+        const std::string sp = join_path(assets_dir, arena_look.sky_path);
+        if (FileExists(sp.c_str())) {
+          sky_tex = LoadTexture(sp.c_str());
+          SetTextureFilter(sky_tex, TEXTURE_FILTER_BILINEAR);
+        }
       }
     } else {
       art_missing.push_back(err);
@@ -1141,6 +1175,14 @@ int main(int argc, char** argv) {
     View v{static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())};
     BeginDrawing();
     ClearBackground(arena_look.sky);
+    if (sky_tex.id != 0) {
+      // céu equirretangular: faixa do horizonte, com leve paralaxe da câmera
+      const float tw = static_cast<float>(sky_tex.width), th = static_cast<float>(sky_tex.height);
+      const float view_w = tw * (cam.fovy * v.w / v.h) / 360.0f;
+      const float src_x = tw * 0.5f - view_w / 2 + cam_x * 6.0f;
+      const float src_h = view_w * v.h / v.w;
+      DrawTexturePro(sky_tex, {src_x, th * 0.5f - src_h * 0.62f, view_w, src_h}, {0, 0, v.w, v.h}, {0, 0}, 0, WHITE);
+    }
     BeginMode3D(cam);
     if (arena_loaded) DrawModel(arena, arena_look.offset, arena_look.scale, WHITE);
     for (int p = 0; p < 2; ++p) {
@@ -1183,12 +1225,9 @@ int main(int argc, char** argv) {
     }
   }
 
-  for (auto& g : fighters) {
-    if (!g.loaded) continue;
-    if (g.anims) UnloadModelAnimations(g.anims, g.anim_count);
-    UnloadModel(g.model);
-  }
+  for (auto& g : fighters) g.unload();
   if (arena_loaded) UnloadModel(arena);
+  if (sky_tex.id != 0) UnloadTexture(sky_tex);
   UnloadTexture(shadow_tex);
   UnloadShader(lit);
   if (g_font_loaded) UnloadFont(g_font);
