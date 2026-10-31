@@ -94,7 +94,13 @@ jobs:
         working-directory: smoke
         env:
           LIBGL_ALWAYS_SOFTWARE: "1"
-        run: xvfb-run -s "-screen 0 1600x900x24" ../build/tools/jogo/fgjogo --smoke smoke.png --frames 300; ls -la
+        run: xvfb-run -s "-screen 0 1600x900x24" ../build/tools/jogo/fgjogo --smoke smoke.png --frames 300 > run.log 2>&1; grep -E "WARNING|ERROR" run.log || true; test -s smoke.png
+      # Prévia reduzida no log (para revisão sem baixar artefatos).
+      - name: Prévia
+        working-directory: smoke
+        run: |
+          convert smoke.png -resize 960x540 -quality 72 preview.jpg
+          echo "PREVIEW-BEGIN"; base64 -w 0 preview.jpg; echo; echo "PREVIEW-END"
       - uses: actions/upload-artifact@v4
         with:
           name: smoke-screenshot
