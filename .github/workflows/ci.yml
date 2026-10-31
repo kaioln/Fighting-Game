@@ -70,4 +70,4 @@ jobs:
       - name: Comparar
         run: |
           cat sums/*/checksum.txt
-          test "$(cat sums/*/checksum.txt | sort -u | wc -l)" = "1"
+          test "$(cat sums/*/checksum.txt | tr -d '\r' | sort -u | wc -l)" = "1"
