@@ -1,4 +1,4 @@
-# Documentação — Fase 1
+# Documentação
 
 | # | Documento | Conteúdo |
 |---|-----------|----------|
@@ -10,6 +10,7 @@
 | 06 | [Mecânica original](06-mecanica-original.md) | Três propostas comparadas e recomendação |
 | 07 | [Direção artística](07-direcao-artistica.md) | Identidade visual, personagens, arena, dependências artísticas |
 | 08 | [Vertical slice](08-vertical-slice.md) | Menor entrega que demonstra a qualidade desejada |
+| 10 | [Núcleo técnico](10-nucleo-tecnico.md) | Fase 2: o que existe, como rodar, regras implementadas, frame data, testes, limitações |
 | — | [GDD inicial](GDD.md) | Game Design Document v0.1 consolidado |
 | — | [Fontes](fontes.md) | Lista de fontes consultadas e bloqueadas |
 

@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  core:
+    name: Núcleo (${{ matrix.os }}, ${{ matrix.config }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        config: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v4
+
+      # No Windows (MSVC) os avisos ainda não foram auditados localmente: compilam sem /WX.
+      - name: Configurar
+        shell: bash
+        run: |
+          EXTRA=""
+          [ "${{ runner.os }}" = "Windows" ] && EXTRA="-DFG_WARNINGS_AS_ERRORS=OFF"
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.config }} $EXTRA
+
+      - name: Compilar
+        run: cmake --build build --config ${{ matrix.config }} --parallel
+
+      - name: Testes
+        run: ctest --test-dir build -C ${{ matrix.config }} --output-on-failure
+
+      - name: Validar dados
+        shell: bash
+        run: |
+          BIN=build/tools/fgsim/fgsim
+          [ -f build/tools/fgsim/${{ matrix.config }}/fgsim.exe ] && BIN=build/tools/fgsim/${{ matrix.config }}/fgsim.exe
+          "$BIN" validate data
+          "$BIN" synctest data 7200 8 3
+
+      - name: Checksum de determinismo
+        shell: bash
+        run: |
+          BIN=build/tools/fgsim/fgsim
+          [ -f build/tools/fgsim/${{ matrix.config }}/fgsim.exe ] && BIN=build/tools/fgsim/${{ matrix.config }}/fgsim.exe
+          "$BIN" checksum data 7200 9 | tee checksum.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: checksum-${{ matrix.os }}-${{ matrix.config }}
+          path: checksum.txt
+
+  sanitizers:
+    name: Núcleo com ASan/UBSan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DFG_SANITIZE=ON
+      - run: cmake --build build --parallel
+      - run: ctest --test-dir build --output-on-failure
+
+  determinism:
+    name: Mesmo checksum em Linux e Windows
+    needs: core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: sums
+      - name: Comparar
+        run: |
+          cat sums/*/checksum.txt
+          test "$(cat sums/*/checksum.txt | sort -u | wc -l)" = "1"

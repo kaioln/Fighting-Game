@@ -1,6 +1,6 @@
 # Game Design Document — v0.1 (Fase 1)
 
-Status: **rascunho para aprovação**. Números são provisórios até a validação da Fase 2.
+Status: **aprovado pelo Kaio (v0.1)**. Números são provisórios até a validação em jogo; o núcleo da Fase 2 está em [10](10-nucleo-tecnico.md).
 
 ## 1. Visão
 
@@ -13,7 +13,7 @@ Codinome: *Projeto Estaleiro*. Ambientação: Porto Bruma ([07](07-direcao-artis
 
 ## 2. Plataforma e técnica
 
-PC Windows, nativo. Simulação determinística a 60 Hz em C++ (`fgcore`), apresentação em Godot 4.
+PC Windows, nativo. Simulação determinística a 60 Hz em C++ (`fgcore`), apresentação em camada fina e trocável (Godot 4 usado minimamente, por preferência do Kaio).
 Rollback-ready desde o núcleo. Detalhes em [05](05-engine-e-arquitetura.md).
 
 ## 3. Controles
