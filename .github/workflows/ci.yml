@@ -99,7 +99,7 @@ jobs:
       - name: Prévia
         working-directory: smoke
         run: |
-          convert smoke.png -resize 960x540 -quality 72 preview.jpg
+          convert smoke.png -resize 640x360 -quality 60 preview.jpg
           echo "PREVIEW-BEGIN"; base64 -w 0 preview.jpg; echo; echo "PREVIEW-END"
       - uses: actions/upload-artifact@v4
         with:
