@@ -9,9 +9,12 @@
   ],
   "scale_milli": 1000,
   "states": {
-    "walk_forward": "Walk_Loop",
+    "walk_forward": {
+      "clip": "Nadja_Anda",
+      "loop": true
+    },
     "walk_back": {
-      "clip": "Walk_Loop",
+      "clip": "Nadja_Anda",
       "reverse": true,
       "loop": true
     },
@@ -49,22 +52,32 @@
       "clip": "Nadja_Queda"
     },
     "ko": {
-      "clip": "Nadja_Queda"
+      "clip": "Nadja_Derrota"
     },
     "wakeup": {
       "clip": "Nadja_Levanta"
     },
-    "thrown": "Hit_Knockback",
-    "throw": "OverhandThrow",
+    "thrown": {
+      "clip": "Nadja_Arremessada"
+    },
+    "throw": {
+      "clip": "Nadja_ChaveQuadril",
+      "contact": 16
+    },
     "tech": {
       "clip": "Nadja_Hit"
     },
-    "win": "Idle_FoldArms_Loop",
+    "win": {
+      "clip": "Nadja_Vitoria"
+    },
     "idle": {
       "clip": "Nadja_Guarda",
       "loop": true
     },
-    "run": "Sprint_Loop"
+    "run": {
+      "clip": "Nadja_Corre",
+      "loop": true
+    }
   },
   "moves": {
     "5LP": {
@@ -182,16 +195,12 @@
       "to": 200
     },
     "throw_f": {
-      "clip": "OverhandThrow",
-      "from": 0,
-      "contact": 23,
-      "to": 50
+      "clip": "Nadja_Agarra",
+      "contact": 4
     },
     "throw_b": {
-      "clip": "OverhandThrow",
-      "from": 0,
-      "contact": 23,
-      "to": 50
+      "clip": "Nadja_Agarra",
+      "contact": 4
     },
     "dash": {
       "clip": "Nadja_Dash"

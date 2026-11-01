@@ -216,7 +216,7 @@ for v in gen.data.vertices:
 print("LOOSE_TO_PELVIS", moved)
 
 # Otto: o avental (couro rígido) segue o quadril: o painel da frente inteiro (a coxa passa por trás dele num
-# chute, sem esticar o couro), as laterais e a barra de trás com mais coxa (inclui as ferramentas penduradas).
+# chute, sem esticar o couro), as laterais e a barra de trás com um pouco de coxa (inclui as ferramentas).
 # A calça larga fica longe da pele do corpo base mas perto do eixo da perna: é perna, não avental.
 def leg_axis_dist(p):
     """Distância ao eixo da perna mais próxima (coxa e canela). A calça larga do Otto fica longe da pele do
@@ -230,27 +230,59 @@ def leg_axis_dist(p):
     return best
 
 
+def vertex_colors(o):
+    """Cor média da textura gerada em cada vértice (pelas UVs dos cantos)."""
+    im = None
+    for m_ in o.data.materials:
+        for n_ in (m_.node_tree.nodes if m_ and m_.use_nodes else []):
+            if n_.type == "TEX_IMAGE" and n_.image is not None and n_.image.size[0] > 0:
+                im = n_.image
+                break
+        if im is not None:
+            break
+    uvl_ = o.data.uv_layers.active
+    if im is None or uvl_ is None:
+        return None
+    w_, h_ = im.size
+    px_ = np.array(im.pixels[:], dtype=np.float32).reshape(h_, w_, 4)[..., :3]
+    acc_ = np.zeros((len(o.data.vertices), 3), dtype=np.float32)
+    cnt_ = np.zeros(len(o.data.vertices), dtype=np.float32)
+    for lp in o.data.loops:
+        u_, v_ = uvl_.data[lp.index].uv
+        acc_[lp.vertex_index] += px_[min(h_ - 1, max(0, int(v_ * (h_ - 1)))), min(w_ - 1, max(0, int(u_ * (w_ - 1))))]
+        cnt_[lp.vertex_index] += 1
+    return acc_ / np.maximum(cnt_, 1)[:, None]
+
+
 pinned_set = set()
 if NAME == "otto":
+    # couro do avental (marrom) x calça (jeans escuro): a lateral do avental fica dentro do volume da coxa, então
+    # só a distância ao eixo da perna não separa os dois; a cor da textura gerada separa
+    vcol_ = vertex_colors(gen)
+    n_leather = [0]
     pinned = 0
     for v in gen.data.vertices:
         if not (B["calf_l"].z - 0.10 < v.co.z < B["thigh_l"].z + 0.05 and abs(v.co.x) < 0.50):
             continue
         loc, nrm, idx, dist = tree.find_nearest(v.co)
         front = v.co.y < B["pelvis"].y - 0.14  # painel da frente: rígido, a coxa passa por trás dele
-        if dist is None or dist < 0.02 or (not front and leg_axis_dist(v.co) < 0.17):
+        r_, g_, b_ = vcol_[v.index] if vcol_ is not None else (0, 0, 0)
+        leather = r_ > b_ + 0.06 and r_ > g_ and v.co.y < B["pelvis"].y + 0.04
+        n_leather[0] += leather
+        if dist is None or dist < 0.02 or (not front and not leather and leg_axis_dist(v.co) < 0.17):
             continue
         if sum(g.weight for g in v.groups if gen.vertex_groups[g.group].name.startswith(ARMISH)) > 0.5:
             continue
         side = "thigh_l" if v.co.x > 0 else "thigh_r"
         for g in list(v.groups):
             gen.vertex_groups[g.group].remove([v.index])
-        pel.add([v.index], 1.0 if front else 0.6, "REPLACE")
+        # laterais: quase rígidas também (com 0,4 de coxa a lateral rasgava em lasca no chute alto)
+        pel.add([v.index], 1.0 if front else 0.85, "REPLACE")
         if not front:
-            gen.vertex_groups[side].add([v.index], 0.4, "REPLACE")
+            gen.vertex_groups[side].add([v.index], 0.15, "REPLACE")
         pinned_set.add(v.index)
         pinned += 1
-    print("APRON_PINNED", pinned)
+    print("APRON_PINNED", pinned, "LEATHER", n_leather[0])
 
 # Pernas por segmento: a calça larga fica longe dos ossos e o calor misturava quadril, coxa e canela de um
 # jeito que, num chute, a perna inteira virava uma lâmina esticada. Cada vértice da perna segue o osso do
@@ -284,6 +316,12 @@ for v in gen.data.vertices:
         wt = max(0.0, (0.15 - t_) / 0.30)      # joelho
         wf = max(0.0, (t_ - 0.90) / 0.20)      # tornozelo
         w["thigh_" + s_], w["foot_" + s_], w["calf_" + s_] = wt, wf, 1.0 - wt - wf
+    # entre a perna e a lateral presa do avental (Otto): transição gradual, senão a borda rasga em lasca
+    if NAME == "otto" and d_ > 0.11 and B["calf_l"].z - 0.10 < v.co.z < B["thigh_l"].z + 0.05:
+        bl = min(1.0, (d_ - 0.11) / 0.06) * 0.7
+        w = {n: x * (1 - bl) for n, x in w.items()}
+        w["pelvis"] = w.get("pelvis", 0.0) + 0.85 * bl
+        w["thigh_" + s_] = w.get("thigh_" + s_, 0.0) + 0.15 * bl
     for g in list(v.groups):
         gen.vertex_groups[g.group].remove([v.index])
     for n, x in w.items():

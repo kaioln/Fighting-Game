@@ -9,9 +9,12 @@
   ],
   "scale_milli": 1050,
   "states": {
-    "walk_forward": "Walk_Loop",
+    "walk_forward": {
+      "clip": "Otto_Anda",
+      "loop": true
+    },
     "walk_back": {
-      "clip": "Walk_Loop",
+      "clip": "Otto_Anda",
       "reverse": true,
       "loop": true
     },
@@ -49,12 +52,14 @@
       "clip": "Otto_Queda"
     },
     "ko": {
-      "clip": "Otto_Queda"
+      "clip": "Otto_Derrota"
     },
     "wakeup": {
       "clip": "Otto_Levanta"
     },
-    "thrown": "Hit_Knockback",
+    "thrown": {
+      "clip": "Otto_Arremessado"
+    },
     "throw": {
       "clip": "Otto_Arremesso",
       "contact": 18
@@ -62,9 +67,15 @@
     "tech": {
       "clip": "Otto_Hit"
     },
-    "win": "Idle_FoldArms_Loop",
+    "win": {
+      "clip": "Otto_Vitoria"
+    },
     "idle": {
       "clip": "Otto_Guarda",
+      "loop": true
+    },
+    "run": {
+      "clip": "Otto_Corre",
       "loop": true
     }
   },

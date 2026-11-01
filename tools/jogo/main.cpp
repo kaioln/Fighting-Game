@@ -1138,6 +1138,7 @@ struct Options {
   bool smoke_guard = false;  // --guard: no --smoke, o P2 fica parado segurando para trás (captura de bloqueio)
   bool full_meter = false;   // --barra: no --smoke, barra de super cheia nos dois lados (captura do super)
   bool no_outline = false;   // --sem-contorno: desliga o contorno dos personagens (diagnóstico)
+  std::string p1_script;     // --p1 "<roteiro>": idem para o P1
   std::string p2_script;     // --p2 "<roteiro>": no --smoke, o P1 fica parado e o P2 segue o roteiro (capturas)
 };
 
@@ -1198,6 +1199,7 @@ int main(int argc, char** argv) {
     else if (a == "--frames" && i + 1 < argc) opt.smoke_frames = std::max(1, std::atoi(argv[++i]));
     else if (a == "--guard") opt.smoke_guard = true;
     else if (a == "--p2" && i + 1 < argc) opt.p2_script = argv[++i];
+    else if (a == "--p1" && i + 1 < argc) opt.p1_script = argv[++i];
     else if (a == "--sem-contorno") opt.no_outline = true;
     else if (a == "--barra") opt.full_meter = true;
   }
@@ -1405,8 +1407,8 @@ int main(int argc, char** argv) {
         in.p[1] = smoke_frame % 90 >= 31 ? (app.state.f[1].facing > 0 ? btn::Left : btn::Right) : InputBits{0};
       if (opt.full_meter)
         for (auto& fi : app.state.f) fi.meter = fg::max_meter(app.data.rules);
-      if (!opt.p2_script.empty()) {
-        in.p[0] = 0;
+      if (!opt.p2_script.empty() || !opt.p1_script.empty()) {
+        in.p[0] = script_input(opt.p1_script, smoke_frame, app.state.f[0].facing);
         in.p[1] = script_input(opt.p2_script, smoke_frame, app.state.f[1].facing);
       }
     } else {

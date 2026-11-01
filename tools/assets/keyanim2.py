@@ -181,20 +181,20 @@ N = {
                              hand_l=(0.16, -0.16, SH_Z + 0.06), foot_r_pitch=-30, pole_up=0.6)),
                      (26, NC)], 8),
     "Nadja_AgChuteLeve": ([(0, NC), (3, nc(foot_l=(0.12, -0.40, 0.12), foot_l_pitch=30)),
-                           (5, nc(foot_l=(0.12, -0.92, 0.10), foot_l_pitch=75, pelvis_yaw=40)),
-                           (8, nc(foot_l=(0.12, -0.88, 0.10), foot_l_pitch=75, pelvis_yaw=40)), (15, NC)], 5),
+                           (5, nc(foot_l=(0.12, -0.92, 0.16), foot_l_pitch=75, pelvis_yaw=40)),
+                           (8, nc(foot_l=(0.12, -0.88, 0.16), foot_l_pitch=75, pelvis_yaw=40)), (15, NC)], 5),
     "Nadja_AgChuteMedio": ([(0, NC), (4, nc(foot_r=(-0.05, 0.05, 0.25), foot_r_pitch=40, pelvis_yaw=50)),
-                            (8, nc(foot_r=(0.0, -1.0, 0.12), foot_r_yaw=90, foot_r_pitch=80, pelvis_yaw=85, spine_yaw=-30,
+                            (8, nc(foot_r=(0.0, -1.0, 0.18), foot_r_yaw=90, foot_r_pitch=80, pelvis_yaw=85, spine_yaw=-30,
                                    hand_r=(-0.25, 0.10, SH_Z - 0.40), foot_l_yaw=100)),
-                            (11, nc(foot_r=(0.0, -0.96, 0.12), foot_r_yaw=90, foot_r_pitch=80, pelvis_yaw=85, spine_yaw=-30,
+                            (11, nc(foot_r=(0.0, -0.96, 0.18), foot_r_yaw=90, foot_r_pitch=80, pelvis_yaw=85, spine_yaw=-30,
                                     hand_r=(-0.25, 0.10, SH_Z - 0.40), foot_l_yaw=100)), (22, NC)], 8),
     # rasteira: gira rente ao chão
     "Nadja_Rasteira": ([(0, NC), (4, nc(pelvis_dz=-0.55, pelvis_yaw=70, spine_yaw=-20, spine_pitch=28,
-                                       hand_l=(0.30, -0.30, 0.30), hand_r=(0.05, -0.20, 0.30), foot_r=(-0.30, 0.20, 0.10))),
+                                       hand_l=(0.30, -0.30, 0.30), hand_r=(0.05, -0.20, 0.30), foot_r=(-0.30, 0.20, 0.15), foot_r_pitch=40)),
                         (10, nc(pelvis_dz=-0.58, pelvis_yaw=150, spine_yaw=-40, spine_pitch=30, hand_l=(0.30, -0.10, 0.25),
-                                hand_r=(0.10, -0.25, 0.25), foot_r=(0.20, -1.05, 0.08), foot_r_yaw=150, foot_r_pitch=80)),
+                                hand_r=(0.10, -0.25, 0.25), foot_r=(0.20, -1.05, 0.15), foot_r_yaw=150, foot_r_pitch=80)),
                         (14, nc(pelvis_dz=-0.58, pelvis_yaw=160, spine_yaw=-40, spine_pitch=30, hand_l=(0.30, -0.10, 0.25),
-                                hand_r=(0.10, -0.25, 0.25), foot_r=(0.35, -0.95, 0.08), foot_r_yaw=160, foot_r_pitch=80)),
+                                hand_r=(0.10, -0.25, 0.25), foot_r=(0.35, -0.95, 0.15), foot_r_yaw=160, foot_r_pitch=80)),
                         (30, NC)], 10),
     "Nadja_PuloInicio": ([(0, NG), (4, ng(pelvis_dz=-0.20, spine_pitch=14, hand_l=(0.12, -0.25, SH_Z - 0.10))),
                           (6, ng(pelvis_dz=-0.02, spine_pitch=-4, foot_l_pitch=-30, foot_r_pitch=-30))], None),
@@ -372,20 +372,20 @@ O["Otto_AgUpper"] = ([(0, OC), (4, oc(pelvis_dz=-0.46, spine_yaw=-26, hand_r=(-0
                       (13, og(pelvis_dz=-0.04, pelvis_yaw=0, spine_yaw=20, spine_pitch=-10, hand_r=(0.0, -0.38, SH_Z + 0.50),
                               hand_l=(0.30, -0.22, SH_Z - 0.02), foot_r_pitch=-30, pole_up=0.6)), (38, OC)], 8)
 O["Otto_AgChuteLeve"] = ([(0, OC), (3, oc(foot_l=(0.22, -0.42, 0.14), foot_l_pitch=30)),
-                          (5, oc(foot_l=(0.20, -0.95, 0.10), foot_l_pitch=75, pelvis_yaw=35)),
-                          (7, oc(foot_l=(0.20, -0.92, 0.10), foot_l_pitch=75, pelvis_yaw=35)), (17, OC)], 5)
+                          (5, oc(foot_l=(0.20, -0.95, 0.16), foot_l_pitch=75, pelvis_yaw=35)),
+                          (7, oc(foot_l=(0.20, -0.92, 0.16), foot_l_pitch=75, pelvis_yaw=35)), (17, OC)], 5)
 O["Otto_AgChuteMedio"] = ([(0, OC), (4, oc(foot_r=(-0.08, 0.05, 0.25), foot_r_pitch=40, pelvis_yaw=45)),
-                           (7, oc(foot_r=(0.0, -1.0, 0.12), foot_r_yaw=90, foot_r_pitch=80, pelvis_yaw=80, spine_yaw=-28,
+                           (7, oc(foot_r=(0.0, -1.0, 0.18), foot_r_yaw=90, foot_r_pitch=80, pelvis_yaw=80, spine_yaw=-28,
                                   hand_r=(-0.30, 0.08, SH_Z - 0.46), foot_l_yaw=95)),
-                           (10, oc(foot_r=(0.0, -0.96, 0.12), foot_r_yaw=90, foot_r_pitch=80, pelvis_yaw=80, spine_yaw=-28,
+                           (10, oc(foot_r=(0.0, -0.96, 0.18), foot_r_yaw=90, foot_r_pitch=80, pelvis_yaw=80, spine_yaw=-28,
                                    hand_r=(-0.30, 0.08, SH_Z - 0.46), foot_l_yaw=95)), (26, OC)], 7)
 # 2HK: rasteira pesada, gira rente ao chão
 O["Otto_Rasteira"] = ([(0, OC), (5, oc(pelvis_dz=-0.52, pelvis_yaw=70, spine_yaw=-20, spine_pitch=30,
-                                       hand_l=(0.36, -0.30, 0.32), hand_r=(0.05, -0.22, 0.32), foot_r=(-0.32, 0.20, 0.10))),
+                                       hand_l=(0.36, -0.30, 0.32), hand_r=(0.05, -0.22, 0.32), foot_r=(-0.32, 0.20, 0.15), foot_r_pitch=40)),
                        (10, oc(pelvis_dz=-0.55, pelvis_yaw=150, spine_yaw=-40, spine_pitch=32, hand_l=(0.36, -0.10, 0.28),
-                               hand_r=(0.10, -0.25, 0.28), foot_r=(0.20, -1.05, 0.08), foot_r_yaw=150, foot_r_pitch=80)),
+                               hand_r=(0.10, -0.25, 0.28), foot_r=(0.20, -1.05, 0.15), foot_r_yaw=150, foot_r_pitch=80)),
                        (14, oc(pelvis_dz=-0.55, pelvis_yaw=160, spine_yaw=-40, spine_pitch=32, hand_l=(0.36, -0.10, 0.28),
-                               hand_r=(0.10, -0.25, 0.28), foot_r=(0.35, -0.95, 0.08), foot_r_yaw=160, foot_r_pitch=80)),
+                               hand_r=(0.10, -0.25, 0.28), foot_r=(0.35, -0.95, 0.15), foot_r_yaw=160, foot_r_pitch=80)),
                        (38, OC)], 10)
 # pulo
 O["Otto_PuloInicio"] = ([(0, OG), (4, og(pelvis_dz=-0.24, spine_pitch=20, hand_l=(0.30, -0.25, SH_Z - 0.22))),
@@ -429,14 +429,14 @@ O["Otto_AereoPisao"] = ([(0, OA), (5, oair(foot_l=(0.18, -0.15, 0.62), foot_r=(-
                          (23, OA)], 9)
 # 236P: investida de ombro (o núcleo carrega o deslocamento)
 O["Otto_Investida"] = ([(0, OG), (5, og(pelvis_dz=-0.18, spine_pitch=30, spine_yaw=-35, hand_l=(0.10, -0.25, SH_Z - 0.25),
-                                        hand_r=(-0.10, -0.15, SH_Z - 0.20), foot_r=(-0.22, 0.40, 0.12), foot_r_pitch=-30)),
+                                        hand_r=(-0.20, -0.32, SH_Z - 0.18), foot_r=(-0.22, 0.40, 0.12), foot_r_pitch=-30)),
                         (9, og(pelvis_dz=-0.16, spine_pitch=28, spine_yaw=-38, hand_l=(0.10, -0.25, SH_Z - 0.25),
-                               hand_r=(-0.10, -0.15, SH_Z - 0.20), foot_l=(0.20, -0.45, 0.20), foot_r=(-0.20, 0.30, 0.10))),
+                               hand_r=(-0.20, -0.32, SH_Z - 0.18), foot_l=(0.20, -0.45, 0.20), foot_r=(-0.20, 0.30, 0.10))),
                         (13, og(pelvis_dz=-0.14, spine_pitch=22, spine_yaw=-45, pelvis_shift=(0, -0.10, 0),
-                                hand_l=(0.30, -0.55, SH_Z - 0.10), hand_r=(-0.10, -0.15, SH_Z - 0.20), pole_up=0.3,
+                                hand_l=(0.30, -0.55, SH_Z - 0.10), hand_r=(-0.20, -0.32, SH_Z - 0.18), pole_up=0.3,
                                 foot_l=(0.20, -0.35, 0.10), foot_r=(-0.22, 0.32, 0.10), foot_r_pitch=-25)),
                         (17, og(pelvis_dz=-0.14, spine_pitch=22, spine_yaw=-45, pelvis_shift=(0, -0.10, 0),
-                                hand_l=(0.30, -0.53, SH_Z - 0.10), hand_r=(-0.10, -0.15, SH_Z - 0.20), pole_up=0.3,
+                                hand_l=(0.30, -0.53, SH_Z - 0.10), hand_r=(-0.20, -0.32, SH_Z - 0.18), pole_up=0.3,
                                 foot_l=(0.20, -0.35, 0.10), foot_r=(-0.22, 0.32, 0.10))), (36, OG)], 13)
 # 236PP: investida reforçada, fecha com as duas palmas à frente
 O["Otto_InvestidaEX"] = ([(0, OG), (4, og(pelvis_dz=-0.20, spine_pitch=32, spine_yaw=-20, hand_l=(0.20, -0.20, SH_Z - 0.22),
@@ -482,6 +482,129 @@ O["Otto_Recuo"] = ([(0, OG), (4, og(pelvis_dz=-0.05, spine_pitch=-8, pelvis_shif
 oq, olie = fall(og)
 O["Otto_Queda"] = (oq, None)
 O["Otto_Levanta"] = (wake(og, olie), None)
+
+
+# ================================================================ ciclos, vitória, derrota, arremessos (os dois)
+def track(keys, f):
+    """Interpola linear uma trilha [(quadro, valor)] no quadro f (valor = tupla)."""
+    for (f0, a), (f1, b) in zip(keys, keys[1:]):
+        if f0 <= f <= f1:
+            t = (f - f0) / (f1 - f0)
+            return tuple(x + (y - x) * t for x, y in zip(a, b))
+    return keys[-1][1]
+
+
+def walk_cycle(base, length, stride, lift, bob):
+    """Caminhada em guarda (base de lado, pé da frente e pé de trás): o pé apoiado escorrega para trás no clipe
+    (o jogo mede essa velocidade e acerta o ritmo com o deslocamento), o outro passa pelo ar."""
+    b = base()
+    (fx, fy, fz), (rx, ry, rz) = b["foot_l"], b["foot_r"]
+    h, q = length // 2, length // 4
+    front = [(0, (fx, fy - stride / 2, fz)), (q, (fx, fy, fz)), (h, (fx, fy + stride / 2, fz)),
+             (h + q, (fx, fy, fz + lift)), (length, (fx, fy - stride / 2, fz))]
+    back = [(0, (rx, ry + stride / 2, rz)), (q, (rx, ry, rz + lift)), (h, (rx, ry - stride / 2, rz)),
+            (h + q, (rx, ry, rz)), (length, (rx, ry + stride / 2, rz))]
+    keys = []
+    for f in (0, q, h, h + q, length):
+        up = f in (q, h + q)  # passagem: quadril no alto
+        hl, hr = b["hand_l"], b["hand_r"]
+        sway = 0.02 if f in (0, h) else -0.02
+        keys.append((f, base(foot_l=track(front, f), foot_r=track(back, f), pelvis_dz=b["pelvis_dz"] + (bob if up else 0.0),
+                             hand_l=(hl[0], hl[1] + sway, hl[2]), hand_r=(hr[0], hr[1] - sway, hr[2]))))
+    return keys
+
+
+def run_cycle(base, length, stride):
+    """Corrida de frente (sai da guarda): tronco inclinado, braços bombeando, fase de voo."""
+    h = length // 2
+    L = [(0, (0.12, -stride / 2, 0.13)), (h // 2 + 1, (0.12, stride / 2, 0.14)), (h, (0.12, stride / 2 - 0.05, 0.42)),
+         (h + h // 2, (0.12, -stride / 4, 0.45)), (length, (0.12, -stride / 2, 0.13))]
+    def foot_r(f):  # o direito repete o esquerdo com meio ciclo de defasagem
+        x, y, z = track(L, (f + h) % length)
+        return (-x, y, z)
+
+    keys = []
+    for f in sorted({0, h // 2 + 1, h, h + h // 2 + 1, length} | {h // 2, h + h // 2}):
+        ph = (f % length) / length
+        arm_swing = math.cos(ph * 2 * math.pi) * 0.22
+        mid = f in (h // 2 + 1, h + h // 2 + 1)
+        keys.append((f, base(pelvis_dz=-0.05 if mid else -0.01, pelvis_yaw=0.0, spine_yaw=0.0, spine_pitch=18.0, head_yaw=0.0,
+                             foot_l=track(L, f), foot_r=foot_r(f), foot_l_yaw=0.0, foot_r_yaw=0.0,
+                             foot_l_pitch=20.0, foot_r_pitch=20.0,
+                             hand_l=(0.20, -0.10 + arm_swing, SH_Z - 0.30), hand_r=(-0.20, -0.10 - arm_swing, SH_Z - 0.30))))
+    return keys
+
+
+def ko_fall(base):
+    """Derrota: cambaleia, os joelhos cedem, senta e cai de costas (mais lenta que a queda comum)."""
+    lie = fall(base)[1]
+    kneel = base(pelvis_dz=-0.50, spine_pitch=32, head_pitch=25, pelvis_shift=(0, 0.06, 0), hand_l=(0.30, -0.25, 0.35),
+                 hand_r=(-0.30, -0.20, 0.38), foot_r=(-0.15, 0.30, 0.10), foot_r_pitch=-60)
+    sit = base(pelvis_dz=-0.66, pelvis_pitch=-20, spine_pitch=10, head_pitch=-15, pelvis_shift=(0, 0.25, 0),
+               hand_l=(0.35, 0.40, 0.15), hand_r=(-0.35, 0.40, 0.15), foot_l=(0.15, -0.30, 0.08),
+               foot_r=(-0.15, -0.10, 0.08), foot_l_yaw=0, foot_r_yaw=0)
+    return [(0, base(spine_pitch=-22, head_pitch=-25, pelvis_shift=(0, 0.06, 0))),
+            (10, base(spine_pitch=-14, head_pitch=-10, pelvis_dz=-0.18, pelvis_shift=(0, 0.12, 0), hand_l=(0.30, 0.0, SH_Z - 0.40),
+                      hand_r=(-0.30, 0.0, SH_Z - 0.40))),
+            (22, kneel), (32, kneel), (42, sit), (54, lie), (80, lie)]
+
+
+def thrown(base):
+    """Arremessado: puxado e dobrado para a frente, erguido de lado e jogado de costas no chão."""
+    lie = fall(base)[1]
+    return [(0, base(spine_pitch=35, head_pitch=20, pelvis_shift=(0, -0.10, 0), hand_l=(0.25, -0.30, SH_Z - 0.40),
+                     hand_r=(-0.25, -0.30, SH_Z - 0.40))),
+            (10, base(pelvis_dz=0.15, pelvis_pitch=-50, spine_pitch=-10, head_pitch=-20, pelvis_shift=(0, 0.10, 0),
+                      foot_l=(0.15, -0.55, 0.85), foot_r=(-0.15, -0.45, 0.75), foot_l_pitch=-40, foot_r_pitch=-40,
+                      hand_l=(0.45, 0.20, SH_Z), hand_r=(-0.45, 0.20, SH_Z), pole_up=-0.3)),
+            (20, base(pelvis_dz=-0.45, pelvis_pitch=-70, spine_pitch=-6, pelvis_shift=(0, 0.35, 0), foot_l=(0.15, -0.50, 0.35),
+                      foot_r=(-0.15, -0.45, 0.30), hand_l=(0.45, 0.70, 0.30), hand_r=(-0.45, 0.70, 0.30), pole_up=-0.5)),
+            (28, lie), (50, lie)]
+
+
+N["Nadja_Anda"] = (walk_cycle(ng, 32, 0.22, 0.10, 0.025), None)
+N["Nadja_Corre"] = (run_cycle(ng, 24, 0.75), None)
+O["Otto_Anda"] = (walk_cycle(og, 40, 0.20, 0.08, 0.02), None)
+O["Otto_Corre"] = (run_cycle(og, 28, 0.70), None)
+# vitória: Nadja ergue o punho e termina com as mãos na cintura; Otto flexiona os dois braços e soca a palma
+N["Nadja_Vitoria"] = ([(0, NG), (10, ng(pelvis_dz=-0.02, spine_pitch=-8, head_pitch=-12, spine_yaw=-10,
+                                        hand_r=(-0.12, -0.05, SH_Z + 0.55), pole_up=0.6)),
+                       (24, ng(pelvis_dz=-0.02, spine_pitch=-10, head_pitch=-14, spine_yaw=-10, hand_r=(-0.12, -0.05, SH_Z + 0.58),
+                               pole_up=0.6)),
+                       (38, ng(pelvis_dz=-0.01, pelvis_yaw=15, spine_yaw=-5, spine_pitch=-2, head_pitch=-6,
+                               hand_l=(0.24, 0.02, SH_Z - 0.48), hand_r=(-0.24, 0.02, SH_Z - 0.48), pole_up=-0.3,
+                               foot_l=(0.14, -0.12, 0.10), foot_r=(-0.14, 0.12, 0.10))),
+                       (70, ng(pelvis_dz=-0.01, pelvis_yaw=15, spine_yaw=-5, spine_pitch=-2, head_pitch=-6,
+                               hand_l=(0.24, 0.02, SH_Z - 0.48), hand_r=(-0.24, 0.02, SH_Z - 0.48), pole_up=-0.3,
+                               foot_l=(0.14, -0.12, 0.10), foot_r=(-0.14, 0.12, 0.10)))], None)
+O["Otto_Vitoria"] = ([(0, OG), (12, og(pelvis_dz=-0.08, spine_pitch=-6, head_pitch=-8, hand_l=(0.42, -0.05, SH_Z + 0.25),
+                                       hand_r=(-0.42, -0.05, SH_Z + 0.25), pole_up=-0.5)),
+                      (30, og(pelvis_dz=-0.09, spine_pitch=-8, head_pitch=-10, hand_l=(0.44, -0.05, SH_Z + 0.27),
+                              hand_r=(-0.44, -0.05, SH_Z + 0.27), pole_up=-0.5)),
+                      (40, og(spine_pitch=6, hand_l=(0.10, -0.42, SH_Z - 0.06), hand_r=(-0.10, -0.40, SH_Z + 0.10))),
+                      (44, og(spine_pitch=8, hand_l=(0.04, -0.42, SH_Z - 0.10), hand_r=(-0.04, -0.40, SH_Z - 0.06))),
+                      (80, og(spine_pitch=8, hand_l=(0.04, -0.42, SH_Z - 0.10), hand_r=(-0.04, -0.40, SH_Z - 0.06)))], None)
+N["Nadja_Derrota"] = (ko_fall(ng), None)
+O["Otto_Derrota"] = (ko_fall(og), None)
+N["Nadja_Arremessada"] = (thrown(ng), None)
+O["Otto_Arremessado"] = (thrown(og), None)
+# arremessos da Nadja: tentativa (as duas mãos à frente) e chave de quadril (entra de lado, gira e projeta)
+N["Nadja_Agarra"] = ([(0, NG), (2, ng(hand_l=(0.14, -0.30, SH_Z - 0.02), hand_r=(-0.10, -0.26, SH_Z))),
+                      (4, ng(pelvis_shift=(0, -0.06, 0), spine_pitch=14, hand_l=(0.14, -0.30 - R, SH_Z - 0.06),
+                             hand_r=(-0.06, -0.26 - R, SH_Z - 0.04))),
+                      (8, ng(pelvis_shift=(0, -0.06, 0), spine_pitch=14, hand_l=(0.14, -0.28 - R, SH_Z - 0.06),
+                             hand_r=(-0.06, -0.24 - R, SH_Z - 0.04))), (28, NG)], 4)
+N["Nadja_ChaveQuadril"] = ([(0, ng(pelvis_shift=(0, -0.06, 0), spine_pitch=14, hand_l=(0.14, -0.28 - R, SH_Z - 0.06),
+                                   hand_r=(-0.06, -0.24 - R, SH_Z - 0.04))),
+                            (8, ng(pelvis_yaw=75, spine_yaw=-20, pelvis_dz=-0.16, pelvis_shift=(0, -0.20, 0), spine_pitch=10,
+                                   hand_l=(0.30, -0.55, SH_Z - 0.10), hand_r=(0.05, -0.65, SH_Z - 0.05),
+                                   foot_r=(-0.08, -0.04, 0.10), foot_r_yaw=90)),
+                            (16, ng(pelvis_yaw=95, spine_yaw=-30, pelvis_dz=-0.26, pelvis_shift=(0, -0.20, 0), spine_pitch=40,
+                                    hand_l=(0.35, -0.75, 0.55), hand_r=(0.10, -0.80, 0.45), foot_r=(0.0, -0.20, 0.10),
+                                    foot_r_yaw=90)),
+                            (22, ng(pelvis_yaw=95, spine_yaw=-30, pelvis_dz=-0.26, pelvis_shift=(0, -0.20, 0), spine_pitch=40,
+                                    hand_l=(0.35, -0.75, 0.50), hand_r=(0.10, -0.80, 0.40), foot_r=(0.0, -0.20, 0.10),
+                                    foot_r_yaw=90)), (40, NG)], 16)
 
 
 # ================================================================ assar e exportar

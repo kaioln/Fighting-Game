@@ -216,8 +216,9 @@ for t in range(len(tris)):
             continue
         wv = np.where(vis, wgt ** 1.5, 0.0).astype(np.float32)
         cv = v["px"][yi, xi]
-        if face is not None and sign < 0 and facing > 0.0:
-            hd = (pos[:, 2] > face["neck_z"] + 0.03) & vis
+        if face is not None and sign < 0 and facing > -0.1:
+            # o close vai até o pescoço (antes parava no queixo e o lado do pescoço ficava borrado)
+            hd = (pos[:, 2] > face["neck_z"] - 0.05) & vis
             if hd.any():
                 # cabeça realinhada à silhueta e amostrada do close (bilinear)
                 Xh, Yh = face["X"](X[hd]), face["Y"](Y[hd])
@@ -275,6 +276,23 @@ vcol[known] /= vw[known][:, None]
 tw = wid[tris]
 eds = np.concatenate([tw[:, [0, 1]], tw[:, [1, 2]], tw[:, [2, 0]]])
 eds = np.concatenate([eds, eds[:, ::-1]])
+# a cor não atravessa de uma parte do corpo para outra (a coxa escondida atrás do avental puxava o marrom dele)
+gn_ = [g.name for g in ob.vertex_groups]
+
+
+def part(n):
+    if n.startswith(("thigh", "calf", "foot", "ball")):
+        return 3 if n.endswith("_l") else 4
+    if n.startswith(("upperarm", "lowerarm", "hand", "thumb", "index", "middle", "ring", "pinky")):
+        return 1 if n.endswith("_l") else 2
+    return 0
+
+
+vlab = np.zeros(NVt, dtype=np.int32)
+for v_ in ob.data.vertices:
+    if v_.groups:
+        vlab[wid[v_.index]] = part(gn_[max(v_.groups, key=lambda g: g.weight).group])
+eds = eds[vlab[eds[:, 0]] == vlab[eds[:, 1]]]
 for _ in range(600):
     if known.all():
         break
