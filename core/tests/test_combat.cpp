@@ -80,7 +80,7 @@ TEST("contra-ataque: acertar durante o startup do oponente é counter hit") {
 
 TEST("contra-ataque: acertar na recuperação é punish counter e move a Maré") {
   MatchState s = fight("nadja", "otto");
-  place(s, 12000);
+  place(s, 14400);  // 12000 + alargamento das caixas de corpo (2400)
   run(s, 1, 0, raw_dir(1) | btn::HK);  // Otto 2HK (rasteira) erra à distância
   run(s, 14, 0, 0);                    // entra na recuperação
   const i32 mare0 = s.mare;

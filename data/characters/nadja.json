@@ -10,8 +10,8 @@
   "run_speed": 1150,
   "jump": { "prejump": 4, "vy": 1340, "gravity": 67, "vx_forward": 520, "vx_back": 450, "landing": 3 },
   "hop":  { "prejump": 4, "vy": 960,  "gravity": 72, "vx_forward": 600, "vx_back": 480, "landing": 2 },
-  "push": { "stand": [-2200, 0, 4400, 15500], "crouch": [-2400, 0, 4800, 10000], "air": [-2100, 3000, 4200, 10000] },
-  "hurt": { "stand": [-2800, 0, 5600, 16800], "crouch": [-3000, 0, 6000, 10500], "air": [-2700, 1500, 5400, 13500] },
+  "push": { "stand": [-2900, 0, 5800, 15500], "crouch": [-3100, 0, 6200, 10000], "air": [-2800, 3000, 5600, 10000] },
+  "hurt": { "stand": [-3500, 0, 7000, 16800], "crouch": [-3700, 0, 7400, 10500], "air": [-3400, 1500, 6800, 13500] },
 
   "required": {
     "dash": "dash", "backdash": "backdash", "throw": "throw_f", "back_throw": "throw_b",
@@ -29,7 +29,7 @@
       "animation": "nadja/5LP_jab_cotovelo_curto", "sfx": "impact_light", "vfx": "spark_light",
       "hits": [ { "frames": [4, 5], "damage": 300, "hitstun": 12, "blockstun": 9, "hitstop": 9,
                   "pushback_hit": 1800, "pushback_block": 2400 } ],
-      "boxes": [ { "frames": [4, 5], "kind": "hit", "box": [2000, 9000, 3800, 2000] } ],
+      "boxes": [ { "frames": [4, 5], "kind": "hit", "box": [2700, 9000, 3800, 2000] } ],
       "cancels": [ { "frames": [4, 9], "into": ["chain", "special", "super"] } ],
       "chain": ["5LP", "2LP", "2LK"],
       "starter_scaling_permil": 100, "meter_gain_hit": 20, "meter_gain_block": 10 },
@@ -39,9 +39,9 @@
       "hits": [ { "frames": [6, 8], "damage": 600, "hitstun": 17, "blockstun": 12, "hitstop": 11,
                   "pushback_hit": 2600, "pushback_block": 3200 } ],
       "boxes": [
-        { "frames": [6, 8], "kind": "hit", "box": [2300, 10000, 5200, 2200] },
-        { "frames": [1, 20], "kind": "hurt", "box": [-2800, 0, 5600, 16800] },
-        { "frames": [6, 14], "kind": "hurt", "box": [2000, 9800, 4500, 2600] }
+        { "frames": [6, 8], "kind": "hit", "box": [3000, 10000, 5200, 2200] },
+        { "frames": [1, 20], "kind": "hurt", "box": [-3500, 0, 7000, 16800] },
+        { "frames": [6, 14], "kind": "hurt", "box": [2700, 9800, 4500, 2600] }
       ],
       "cancels": [ { "frames": [6, 14], "into": ["special", "super"] } ],
       "meter_gain_hit": 40, "meter_gain_block": 20 },
@@ -51,9 +51,9 @@
       "hits": [ { "frames": [10, 12], "damage": 900, "hitstun": 22, "blockstun": 16, "hitstop": 13,
                   "pushback_hit": 3600, "pushback_block": 4400 } ],
       "boxes": [
-        { "frames": [10, 12], "kind": "hit", "box": [2100, 10500, 5600, 2800] },
-        { "frames": [1, 30], "kind": "hurt", "box": [-2800, 0, 5600, 16800] },
-        { "frames": [10, 22], "kind": "hurt", "box": [2000, 10200, 5000, 3000] }
+        { "frames": [10, 12], "kind": "hit", "box": [2800, 10500, 5600, 2800] },
+        { "frames": [1, 30], "kind": "hurt", "box": [-3500, 0, 7000, 16800] },
+        { "frames": [10, 22], "kind": "hurt", "box": [2700, 10200, 5000, 3000] }
       ],
       "velocity": [ { "frames": [3, 9], "vx": 250 } ],
       "cancels": [ { "frames": [10, 16], "into": ["special", "super"] } ],
@@ -63,7 +63,7 @@
       "animation": "nadja/5LK_ponteira_baixa", "sfx": "impact_light", "vfx": "spark_light",
       "hits": [ { "frames": [5, 6], "damage": 300, "hitstun": 13, "blockstun": 9, "hitstop": 9,
                   "pushback_hit": 1800, "pushback_block": 2400 } ],
-      "boxes": [ { "frames": [5, 6], "kind": "hit", "box": [2000, 5000, 4300, 2000] } ],
+      "boxes": [ { "frames": [5, 6], "kind": "hit", "box": [2700, 5000, 4300, 2000] } ],
       "cancels": [ { "frames": [5, 10], "into": ["special", "super"] } ],
       "starter_scaling_permil": 100, "meter_gain_hit": 20, "meter_gain_block": 10 },
 
@@ -73,9 +73,9 @@
       "hits": [ { "frames": [8, 10], "damage": 700, "hitstun": 18, "blockstun": 13, "hitstop": 11,
                   "pushback_hit": 2600, "pushback_block": 3200 } ],
       "boxes": [
-        { "frames": [8, 10], "kind": "hit", "box": [2500, 6000, 6200, 2200] },
-        { "frames": [1, 25], "kind": "hurt", "box": [-2800, 0, 5600, 16800] },
-        { "frames": [8, 20], "kind": "hurt", "box": [2300, 5800, 5600, 2600] }
+        { "frames": [8, 10], "kind": "hit", "box": [3200, 6000, 6200, 2200] },
+        { "frames": [1, 25], "kind": "hurt", "box": [-3500, 0, 7000, 16800] },
+        { "frames": [8, 20], "kind": "hurt", "box": [3000, 5800, 5600, 2600] }
       ],
       "meter_gain_hit": 40, "meter_gain_block": 20 },
 
@@ -83,7 +83,7 @@
       "animation": "nadja/5HK_joelhada_avancando", "sfx": "impact_heavy", "vfx": "spark_heavy",
       "hits": [ { "frames": [12, 15], "damage": 1000, "hitstun": 25, "blockstun": 17, "hitstop": 14,
                   "pushback_hit": 3800, "pushback_block": 4600 } ],
-      "boxes": [ { "frames": [12, 15], "kind": "hit", "box": [1700, 8000, 4200, 4000] } ],
+      "boxes": [ { "frames": [12, 15], "kind": "hit", "box": [2400, 8000, 4200, 4000] } ],
       "velocity": [ { "frames": [4, 13], "vx": 600 } ],
       "cancels": [ { "frames": [12, 18], "into": ["super"] } ],
       "meter_gain_hit": 60, "meter_gain_block": 30 },
@@ -92,7 +92,7 @@
       "animation": "nadja/2LP_soco_agachado", "sfx": "impact_light", "vfx": "spark_light",
       "hits": [ { "frames": [4, 5], "damage": 280, "hitstun": 12, "blockstun": 9, "hitstop": 9,
                   "pushback_hit": 1800, "pushback_block": 2400 } ],
-      "boxes": [ { "frames": [4, 5], "kind": "hit", "box": [2000, 6500, 3500, 1800] } ],
+      "boxes": [ { "frames": [4, 5], "kind": "hit", "box": [2700, 6500, 3500, 1800] } ],
       "cancels": [ { "frames": [4, 9], "into": ["chain", "special", "super"] } ],
       "chain": ["5LP", "2LP", "2LK"],
       "starter_scaling_permil": 100, "meter_gain_hit": 20, "meter_gain_block": 10 },
@@ -101,7 +101,7 @@
       "animation": "nadja/2MP_cotovelo_baixo", "sfx": "impact_medium", "vfx": "spark_medium",
       "hits": [ { "frames": [6, 8], "damage": 550, "hitstun": 16, "blockstun": 12, "hitstop": 11,
                   "pushback_hit": 2400, "pushback_block": 3000 } ],
-      "boxes": [ { "frames": [6, 8], "kind": "hit", "box": [2100, 6000, 4200, 2400] } ],
+      "boxes": [ { "frames": [6, 8], "kind": "hit", "box": [2800, 6000, 4200, 2400] } ],
       "cancels": [ { "frames": [6, 13], "into": ["special", "super"] } ],
       "meter_gain_hit": 40, "meter_gain_block": 20 },
 
@@ -111,9 +111,9 @@
       "hits": [ { "frames": [8, 11], "damage": 850, "hitstun": 22, "blockstun": 14, "hitstop": 13,
                   "pushback_hit": 3000, "pushback_block": 3800, "juggle_cost": 2 } ],
       "boxes": [
-        { "frames": [8, 11], "kind": "hit", "box": [1300, 9000, 3200, 10000] },
-        { "frames": [1, 7], "kind": "hurt", "box": [-3000, 0, 6000, 10500] },
-        { "frames": [8, 31], "kind": "hurt", "box": [-2800, 0, 5600, 16800] }
+        { "frames": [8, 11], "kind": "hit", "box": [2000, 9000, 3200, 10000] },
+        { "frames": [1, 7], "kind": "hurt", "box": [-3700, 0, 7400, 10500] },
+        { "frames": [8, 31], "kind": "hurt", "box": [-3500, 0, 7000, 16800] }
       ],
       "cancels": [ { "frames": [8, 14], "into": ["special", "super"] } ],
       "meter_gain_hit": 60, "meter_gain_block": 30 },
@@ -122,7 +122,7 @@
       "animation": "nadja/2LK_rasteira_curta", "sfx": "impact_light", "vfx": "spark_light",
       "hits": [ { "frames": [5, 6], "damage": 250, "hitstun": 12, "blockstun": 8, "hitstop": 9,
                   "pushback_hit": 1800, "pushback_block": 2400, "level": "low" } ],
-      "boxes": [ { "frames": [5, 6], "kind": "hit", "box": [2000, 0, 4000, 2000] } ],
+      "boxes": [ { "frames": [5, 6], "kind": "hit", "box": [2700, 0, 4000, 2000] } ],
       "cancels": [ { "frames": [5, 9], "into": ["chain", "special", "super"] } ],
       "chain": ["2LP", "2LK"],
       "starter_scaling_permil": 100, "meter_gain_hit": 20, "meter_gain_block": 10 },
@@ -132,9 +132,9 @@
       "hits": [ { "frames": [7, 9], "damage": 600, "hitstun": 17, "blockstun": 13, "hitstop": 11,
                   "pushback_hit": 2600, "pushback_block": 3200, "level": "low" } ],
       "boxes": [
-        { "frames": [7, 9], "kind": "hit", "box": [2300, 0, 6000, 2400] },
-        { "frames": [1, 23], "kind": "hurt", "box": [-3000, 0, 6000, 10500] },
-        { "frames": [7, 18], "kind": "hurt", "box": [2100, 0, 5400, 2800] }
+        { "frames": [7, 9], "kind": "hit", "box": [3000, 0, 6000, 2400] },
+        { "frames": [1, 23], "kind": "hurt", "box": [-3700, 0, 7400, 10500] },
+        { "frames": [7, 18], "kind": "hurt", "box": [2800, 0, 5400, 2800] }
       ],
       "cancels": [ { "frames": [7, 12], "into": ["special", "super"] } ],
       "meter_gain_hit": 40, "meter_gain_block": 20 },
@@ -144,9 +144,9 @@
       "hits": [ { "frames": [9, 11], "damage": 900, "hitstun": 20, "blockstun": 12, "hitstop": 12,
                   "pushback_hit": 2000, "pushback_block": 3600, "level": "low", "knockdown": true } ],
       "boxes": [
-        { "frames": [9, 11], "kind": "hit", "box": [2000, 0, 6400, 1800] },
-        { "frames": [1, 33], "kind": "hurt", "box": [-3000, 0, 6000, 10500] },
-        { "frames": [9, 24], "kind": "hurt", "box": [2000, 0, 6000, 2200] }
+        { "frames": [9, 11], "kind": "hit", "box": [2700, 0, 6400, 1800] },
+        { "frames": [1, 33], "kind": "hurt", "box": [-3700, 0, 7400, 10500] },
+        { "frames": [9, 24], "kind": "hurt", "box": [2700, 0, 6000, 2200] }
       ],
       "meter_gain_hit": 60, "meter_gain_block": 30 },
 
@@ -155,7 +155,7 @@
       "animation": "nadja/jLP", "sfx": "impact_light", "vfx": "spark_light",
       "hits": [ { "frames": [4, 9], "damage": 300, "hitstun": 11, "blockstun": 9, "hitstop": 9,
                   "pushback_hit": 1600, "pushback_block": 2000, "level": "overhead" } ],
-      "boxes": [ { "frames": [4, 9], "kind": "hit", "box": [1300, 8000, 3000, 2500] } ],
+      "boxes": [ { "frames": [4, 9], "kind": "hit", "box": [2000, 8000, 3000, 2500] } ],
       "cancels": [ { "frames": [4, 10], "into": ["special"] } ],
       "starter_scaling_permil": 100, "meter_gain_hit": 20, "meter_gain_block": 10 },
 
@@ -164,7 +164,7 @@
       "animation": "nadja/jMP", "sfx": "impact_medium", "vfx": "spark_medium",
       "hits": [ { "frames": [6, 9], "damage": 600, "hitstun": 15, "blockstun": 11, "hitstop": 11,
                   "pushback_hit": 2000, "pushback_block": 2400, "level": "overhead" } ],
-      "boxes": [ { "frames": [6, 9], "kind": "hit", "box": [1400, 6000, 3400, 3000] } ],
+      "boxes": [ { "frames": [6, 9], "kind": "hit", "box": [2100, 6000, 3400, 3000] } ],
       "meter_gain_hit": 40, "meter_gain_block": 20 },
 
     { "id": "j.HP", "kind": "normal", "startup": 8, "active": 4, "recovery": 8, "airborne": true,
@@ -172,7 +172,7 @@
       "animation": "nadja/jHP_martelo_descendente", "sfx": "impact_heavy", "vfx": "spark_heavy",
       "hits": [ { "frames": [8, 11], "damage": 850, "hitstun": 18, "blockstun": 13, "hitstop": 13,
                   "pushback_hit": 2200, "pushback_block": 2600, "level": "overhead" } ],
-      "boxes": [ { "frames": [8, 11], "kind": "hit", "box": [1000, 3000, 3500, 4000] } ],
+      "boxes": [ { "frames": [8, 11], "kind": "hit", "box": [1700, 3000, 3500, 4000] } ],
       "meter_gain_hit": 60, "meter_gain_block": 30 },
 
     { "id": "j.LK", "kind": "normal", "startup": 4, "active": 8, "recovery": 4, "airborne": true,
@@ -181,7 +181,7 @@
       "animation": "nadja/jLK_joelho_cruzado", "sfx": "impact_light", "vfx": "spark_light",
       "hits": [ { "frames": [4, 11], "damage": 280, "hitstun": 11, "blockstun": 9, "hitstop": 9,
                   "pushback_hit": 1600, "pushback_block": 2000, "level": "overhead" } ],
-      "boxes": [ { "frames": [4, 11], "kind": "hit", "box": [-2000, 4000, 5500, 2500] } ],
+      "boxes": [ { "frames": [4, 11], "kind": "hit", "box": [-2700, 4000, 6900, 2500] } ],
       "starter_scaling_permil": 100, "meter_gain_hit": 20, "meter_gain_block": 10 },
 
     { "id": "j.MK", "kind": "normal", "startup": 6, "active": 5, "recovery": 6, "airborne": true,
@@ -189,7 +189,7 @@
       "animation": "nadja/jMK", "sfx": "impact_medium", "vfx": "spark_medium",
       "hits": [ { "frames": [6, 10], "damage": 550, "hitstun": 15, "blockstun": 11, "hitstop": 11,
                   "pushback_hit": 2000, "pushback_block": 2400, "level": "overhead" } ],
-      "boxes": [ { "frames": [6, 10], "kind": "hit", "box": [1300, 4500, 4200, 2600] } ],
+      "boxes": [ { "frames": [6, 10], "kind": "hit", "box": [2000, 4500, 4200, 2600] } ],
       "meter_gain_hit": 40, "meter_gain_block": 20 },
 
     { "id": "j.HK", "kind": "normal", "startup": 9, "active": 4, "recovery": 8, "airborne": true,
@@ -197,7 +197,7 @@
       "animation": "nadja/jHK_voadora", "sfx": "impact_heavy", "vfx": "spark_heavy",
       "hits": [ { "frames": [9, 12], "damage": 900, "hitstun": 18, "blockstun": 13, "hitstop": 13,
                   "pushback_hit": 2400, "pushback_block": 2800, "level": "overhead" } ],
-      "boxes": [ { "frames": [9, 12], "kind": "hit", "box": [1500, 2500, 4500, 3000] } ],
+      "boxes": [ { "frames": [9, 12], "kind": "hit", "box": [2200, 2500, 4500, 3000] } ],
       "meter_gain_hit": 60, "meter_gain_block": 30 },
 
     { "id": "6MP", "kind": "command_normal", "startup": 18, "active": 2, "recovery": 14,
@@ -205,7 +205,7 @@
       "animation": "nadja/6MP_cotovelo_overhead", "sfx": "impact_medium", "vfx": "spark_overhead",
       "hits": [ { "frames": [18, 19], "damage": 600, "hitstun": 15, "blockstun": 11, "hitstop": 11,
                   "pushback_hit": 2400, "pushback_block": 3000, "level": "overhead" } ],
-      "boxes": [ { "frames": [18, 19], "kind": "hit", "box": [1700, 9000, 3600, 4500] } ],
+      "boxes": [ { "frames": [18, 19], "kind": "hit", "box": [2400, 9000, 3600, 4500] } ],
       "velocity": [ { "frames": [4, 17], "vx": 300 } ],
       "meter_gain_hit": 40, "meter_gain_block": 20 },
 
@@ -219,8 +219,8 @@
           "pushback_hit": 4000, "pushback_block": 5000, "knockdown": true }
       ],
       "boxes": [
-        { "frames": [12, 13], "kind": "hit", "box": [1700, 9000, 3600, 3000] },
-        { "frames": [17, 19], "kind": "hit", "box": [1700, 8500, 4000, 3500] }
+        { "frames": [12, 13], "kind": "hit", "box": [2400, 9000, 3600, 3000] },
+        { "frames": [17, 19], "kind": "hit", "box": [2400, 8500, 4000, 3500] }
       ],
       "velocity": [ { "frames": [2, 16], "vx": 700 } ],
       "cancels": [ { "frames": [17, 24], "into": ["super"] } ],
@@ -236,8 +236,8 @@
           "juggle_cost": 2 }
       ],
       "boxes": [
-        { "frames": [10, 11], "kind": "hit", "box": [1700, 9000, 3600, 3000] },
-        { "frames": [14, 17], "kind": "hit", "box": [1700, 8500, 4000, 3500] }
+        { "frames": [10, 11], "kind": "hit", "box": [2400, 9000, 3600, 3000] },
+        { "frames": [14, 17], "kind": "hit", "box": [2400, 8500, 4000, 3500] }
       ],
       "strike_invuln": [ [1, 6] ],
       "velocity": [ { "frames": [2, 14], "vx": 850 } ],
@@ -249,8 +249,8 @@
       "hits": [ { "frames": [10, 17], "damage": 900, "hitstun": 20, "blockstun": 14, "hitstop": 12,
                   "pushback_hit": 2000, "pushback_block": 3000, "level": "low", "knockdown": true } ],
       "boxes": [
-        { "frames": [10, 17], "kind": "hit", "box": [1500, 0, 4500, 2200] },
-        { "frames": [1, 35], "kind": "hurt", "box": [-3000, 0, 6500, 8000] }
+        { "frames": [10, 17], "kind": "hit", "box": [2200, 0, 4500, 2200] },
+        { "frames": [1, 35], "kind": "hurt", "box": [-3700, 0, 7900, 8000] }
       ],
       "velocity": [ { "frames": [6, 17], "vx": 900 } ],
       "meter_gain_hit": 100, "meter_gain_block": 50 },
@@ -260,7 +260,7 @@
       "animation": "nadja/214K_meia_lua_ponteira", "sfx": "special_spin_kick", "vfx": "spark_overhead",
       "hits": [ { "frames": [20, 22], "damage": 900, "hitstun": 18, "blockstun": 12, "hitstop": 13,
                   "pushback_hit": 3200, "pushback_block": 4000, "level": "overhead" } ],
-      "boxes": [ { "frames": [20, 22], "kind": "hit", "box": [1500, 10000, 4500, 6000] } ],
+      "boxes": [ { "frames": [20, 22], "kind": "hit", "box": [2200, 10000, 4500, 6000] } ],
       "velocity": [ { "frames": [5, 19], "vx": 350 } ],
       "meter_gain_hit": 100, "meter_gain_block": 50 },
 
@@ -271,7 +271,7 @@
       "hits": [ { "frames": [5, 10], "damage": 1100, "hitstun": 30, "blockstun": 18, "hitstop": 13,
                   "pushback_hit": 1500, "pushback_block": 2500, "launch": true, "launch_vx": 250,
                   "launch_vy": 950, "juggle_cost": 2 } ],
-      "boxes": [ { "frames": [5, 10], "kind": "hit", "box": [1100, 7000, 3200, 10000] } ],
+      "boxes": [ { "frames": [5, 10], "kind": "hit", "box": [1800, 7000, 3200, 10000] } ],
       "strike_invuln": [ [1, 6] ],
       "airborne_frames": [ [5, 30] ],
       "velocity": [ { "frames": [5, 5], "vx": 200, "vy": 1300, "impulse": true } ],
@@ -290,8 +290,8 @@
           "juggle_cost": 2 }
       ],
       "boxes": [
-        { "frames": [4, 6], "kind": "hit", "box": [1100, 6000, 3400, 10000] },
-        { "frames": [7, 11], "kind": "hit", "box": [1100, 9000, 3200, 10000] }
+        { "frames": [4, 6], "kind": "hit", "box": [1800, 6000, 3400, 10000] },
+        { "frames": [7, 11], "kind": "hit", "box": [1800, 9000, 3200, 10000] }
       ],
       "strike_invuln": [ [1, 9] ],
       "throw_invuln": [ [1, 9] ],
@@ -312,9 +312,9 @@
           "juggle_cost": 0 }
       ],
       "boxes": [
-        { "frames": [7, 8], "kind": "hit", "box": [1500, 6000, 4000, 8000] },
-        { "frames": [10, 11], "kind": "hit", "box": [1500, 6000, 4000, 8000] },
-        { "frames": [13, 15], "kind": "hit", "box": [1500, 5000, 4500, 10000] }
+        { "frames": [7, 8], "kind": "hit", "box": [2200, 6000, 4000, 8000] },
+        { "frames": [10, 11], "kind": "hit", "box": [2200, 6000, 4000, 8000] },
+        { "frames": [13, 15], "kind": "hit", "box": [2200, 5000, 4500, 10000] }
       ],
       "strike_invuln": [ [1, 12] ],
       "throw_invuln": [ [1, 12] ],
@@ -322,13 +322,13 @@
 
     { "id": "throw_f", "kind": "throw", "startup": 5, "active": 3, "recovery": 20,
       "animation": "nadja/throw_forward_chave_de_quadril", "sfx": "throw_grab",
-      "boxes": [ { "frames": [5, 7], "kind": "throw", "box": [1500, 2000, 2200, 12000] } ],
-      "throw_damage": 1200, "throw_end_distance": 10000 },
+      "boxes": [ { "frames": [5, 7], "kind": "throw", "box": [2200, 2000, 2200, 12000] } ],
+      "throw_damage": 1200, "throw_end_distance": 11400 },
 
     { "id": "throw_b", "kind": "throw", "startup": 5, "active": 3, "recovery": 20,
       "animation": "nadja/throw_back_tesoura", "sfx": "throw_grab",
-      "boxes": [ { "frames": [5, 7], "kind": "throw", "box": [1500, 2000, 2200, 12000] } ],
-      "throw_damage": 1300, "throw_swaps_sides": true, "throw_end_distance": 10000 },
+      "boxes": [ { "frames": [5, 7], "kind": "throw", "box": [2200, 2000, 2200, 12000] } ],
+      "throw_damage": 1300, "throw_swaps_sides": true, "throw_end_distance": 11400 },
 
     { "id": "dash", "kind": "movement", "startup": 1, "active": 1, "recovery": 16,
       "animation": "nadja/dash_forward",
@@ -352,7 +352,7 @@
       "animation": "nadja/mare_contracorrente", "vfx": "mare_wave_back", "sfx": "mare_pushback",
       "hits": [ { "frames": [4, 6], "damage": 0, "hitstun": 18, "blockstun": 18, "hitstop": 10,
                   "pushback_hit": 9000, "pushback_block": 9000 } ],
-      "boxes": [ { "frames": [4, 6], "kind": "hit", "box": [1000, 0, 4500, 16000] } ],
+      "boxes": [ { "frames": [4, 6], "kind": "hit", "box": [1700, 0, 4500, 16000] } ],
       "strike_invuln": [ [1, 7] ] }
   ],
 
