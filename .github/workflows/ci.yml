@@ -82,29 +82,23 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl1-mesa-dev xvfb mesa-utils imagemagick
       - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DFG_BUILD_GAME=ON
       - run: cmake --build build --parallel --target fgjogo
-      # Modelo de teste: robot.glb (Quaternius, CC0) que acompanha o código-fonte da raylib. Só para a CI.
-      - name: Montar pasta de teste
-        run: |
-          mkdir -p smoke/assets/test
-          cp -r data smoke/data
-          cp build/_deps/raylib-src/examples/models/resources/models/gltf/robot.glb smoke/assets/test/
-          ./build/tools/jogo/fgjogo --anims smoke/assets/test/robot.glb | tee clips.txt
-          python3 tools/ci/smoke_presentation.py clips.txt test/robot.glb smoke/data/presentation
-      - name: Rodar 300 frames e capturar a tela
-        working-directory: smoke
+      - name: Rodar 300 frames com a arte real e capturar a tela
         env:
           LIBGL_ALWAYS_SOFTWARE: "1"
-        run: xvfb-run -s "-screen 0 1600x900x24" ../build/tools/jogo/fgjogo --smoke smoke.png --frames 300 > run.log 2>&1; grep -E "WARNING|ERROR" run.log || true; test -s smoke.png
+        run: |
+          ./build/tools/jogo/fgjogo --anims assets/animations/ual.glb | head -5
+          xvfb-run -s "-screen 0 1600x900x24" ./build/tools/jogo/fgjogo --smoke smoke.png --frames 300 > run.log 2>&1 || { tail -40 run.log; exit 1; }
+          grep -E "WARNING|ERROR" run.log | head -40 || true
+          test -s smoke.png
       # Prévia reduzida no log (para revisão sem baixar artefatos).
       - name: Prévia
-        working-directory: smoke
         run: |
           convert smoke.png -resize 640x360 -quality 60 preview.jpg
           echo "PREVIEW-BEGIN"; base64 -w 0 preview.jpg; echo; echo "PREVIEW-END"
       - uses: actions/upload-artifact@v4
         with:
           name: smoke-screenshot
-          path: smoke/smoke.png
+          path: smoke.png
 
   game-windows:
     name: Jogo 3D (Windows, executável)

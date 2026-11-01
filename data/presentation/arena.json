@@ -1,0 +1,16 @@
+// Arena Dique Seco 7 (kits Kenney CC0 + texturas ambientCG CC0 + céu Poly Haven CC0).
+{
+  "model": "arena/doca.glb",
+  "scale_milli": 1000,
+  "sky_image": "sky/abandoned_slipway.png",
+  "sky": [
+    150,
+    160,
+    170
+  ],
+  "fog": [
+    170,
+    178,
+    186
+  ]
+}

@@ -8,6 +8,7 @@
 // Feito com raylib (zlib) para ser pequeno e leve: roda em GPUs integradas.
 
 #include <raylib.h>
+#include <cctype>
 #include <cmath>
 #include <cstdlib>
 
@@ -469,8 +470,11 @@ struct View {
 // em que o golpe faz contato (alinha o primeiro frame ativo do núcleo com o impacto da animação).
 struct ClipRef {
   std::string clip;
-  int contact = -1;
+  int contact = -1;      // quadro do clipe (60 por segundo) em que o golpe atinge
+  int from = 0;          // trecho do clipe usado (quadros); -1 em `to` = até o fim
+  int to = -1;
   bool loop = false;
+  bool reverse = false;  // toca de trás para a frente (ex.: andar para trás)
 };
 
 struct CharacterLook {
@@ -510,6 +514,9 @@ ClipRef read_clip(const fg::json::Value& v) {
     if (const auto* c = v.find("clip"); c && c->is_string()) r.clip = c->as_string();
     if (const auto* c = v.find("contact"); c && c->is_int()) r.contact = static_cast<int>(c->as_int());
     if (const auto* c = v.find("loop"); c && c->is_bool()) r.loop = c->as_bool();
+    if (const auto* c = v.find("from"); c && c->is_int()) r.from = static_cast<int>(c->as_int());
+    if (const auto* c = v.find("to"); c && c->is_int()) r.to = static_cast<int>(c->as_int());
+    if (const auto* c = v.find("reverse"); c && c->is_bool()) r.reverse = c->as_bool();
   }
   return r;
 }
@@ -626,6 +633,30 @@ struct Fighter3D {
   }
 };
 
+// O núcleo decide a posição: remove o deslocamento horizontal da pelve ao longo do clipe
+// (root motion das capturas), mantendo a altura e a rotação.
+void lock_root_motion(ModelAnimation& a) {
+  int pelvis = -1;
+  for (int b = 0; b < a.boneCount; ++b) {
+    std::string n = a.bones[b].name;
+    std::transform(n.begin(), n.end(), n.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    if (n == "pelvis" || n == "hips" || n.find("pelvis") != std::string::npos) {
+      pelvis = b;
+      break;
+    }
+  }
+  if (pelvis < 0 || a.frameCount < 2) return;
+  const Vector3 base = a.framePoses[0][pelvis].translation;
+  for (int f = 1; f < a.frameCount; ++f) {
+    const Vector3 cur = a.framePoses[f][pelvis].translation;
+    const float dx = cur.x - base.x, dz = cur.z - base.z;
+    for (int b = 0; b < a.boneCount; ++b) {
+      a.framePoses[f][b].translation.x -= dx;
+      a.framePoses[f][b].translation.z -= dz;
+    }
+  }
+}
+
 // Nome do estado de apresentação para cada estado do núcleo.
 std::string state_key(const MatchState& s, int p) {
   const FighterState& f = s.f[p];
@@ -708,13 +739,15 @@ void animate(Fighter3D& g, const App& a, int p) {
   const int ai = g.find_anim(ref->clip);
   if (ai < 0) return;
   const ModelAnimation& anim = g.all[static_cast<size_t>(ai)];
-  const int n = std::max(1, anim.frameCount);
+  const int first = std::clamp(ref->from, 0, std::max(0, anim.frameCount - 1));
+  const int last = ref->to >= 0 ? std::clamp(ref->to, first, anim.frameCount - 1) : anim.frameCount - 1;
+  const int n = std::max(1, last - first + 1);
   int frame = 0;
   if (m && key.rfind("move:", 0) == 0) {
     // Tempo do golpe ditado pelo núcleo: o contato da animação cai no primeiro frame ativo.
     const int total = std::max(2, static_cast<int>(m->total_frames()));
     const int mf = std::clamp(static_cast<int>(f.move_frame), 1, total);
-    const int contact = ref->contact >= 0 ? std::min(ref->contact, n - 1) : (n - 1) / 3;
+    const int contact = ref->contact >= 0 ? std::clamp(ref->contact - first, 0, n - 1) : (n - 1) / 3;
     const int startup = std::max(1, static_cast<int>(m->startup));
     if (mf <= startup) frame = startup <= 1 ? contact : (mf - 1) * contact / (startup - 1);
     else frame = contact + (mf - startup) * (n - 1 - contact) / std::max(1, total - startup);
@@ -723,7 +756,8 @@ void animate(Fighter3D& g, const App& a, int p) {
   } else {
     frame = std::min(g.local_frame, n - 1);
   }
-  UpdateModelAnimation(g.model, anim, frame);
+  if (ref->reverse) frame = n - 1 - frame;
+  UpdateModelAnimation(g.model, anim, first + frame);
 }
 
 void draw_bar(float x, float y, float w, float h, float frac, Color fg_c, Color bg_c, bool from_right) {
@@ -1039,7 +1073,10 @@ int main(int argc, char** argv) {
     }
     g.model = LoadModel(path.c_str());
     g.anims = LoadModelAnimations(path.c_str(), &g.anim_count);
-    for (int i = 0; i < g.anim_count; ++i) g.all.push_back(g.anims[i]);
+    for (int i = 0; i < g.anim_count; ++i) {
+      lock_root_motion(g.anims[i]);
+      g.all.push_back(g.anims[i]);
+    }
     for (const auto& f : g.look.anim_files) {
       const std::string ap = join_path(assets_dir, f);
       int n = 0;
@@ -1050,7 +1087,9 @@ int main(int argc, char** argv) {
       }
       g.extra.emplace_back(an, n);
       for (int i = 0; i < n; ++i) {
-        if (an[i].boneCount == g.model.boneCount) g.all.push_back(an[i]);
+        if (an[i].boneCount != g.model.boneCount) continue;
+        lock_root_motion(an[i]);
+        g.all.push_back(an[i]);
       }
     }
     apply_shader(g.model, lit);

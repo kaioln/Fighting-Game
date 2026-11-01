@@ -1,0 +1,158 @@
+// Apresentação: liga estados e golpes do núcleo a clipes de animação (60 quadros/s).
+// contact = quadro do clipe que coincide com o primeiro frame ativo do golpe. Gerado e ajustado à mão.
+{
+  "model": "characters/nadja_base.glb",
+  "animations": [
+    "animations/ual.glb",
+    "animations/kicks.glb"
+  ],
+  "scale_milli": 1000,
+  "states": {
+    "walk_forward": "Walk_Loop",
+    "walk_back": {
+      "clip": "Walk_Loop",
+      "reverse": true,
+      "loop": true
+    },
+    "crouch": "Crouch_Idle_Loop",
+    "jump_start": "Jump_Start",
+    "jump": "Jump_Loop",
+    "land": "Jump_Land",
+    "hit": "Hit_Chest",
+    "hit_crouch": "Hit_Head",
+    "block": {
+      "clip": "Hit_Head",
+      "to": 8
+    },
+    "block_crouch": {
+      "clip": "Crouch_Idle_Loop",
+      "to": 1
+    },
+    "guard": {
+      "clip": "Hit_Head",
+      "to": 8
+    },
+    "juggle": "Hit_Knockback",
+    "knockdown": "Death01",
+    "ko": "Death01",
+    "wakeup": "LayToIdle",
+    "thrown": "Hit_Knockback",
+    "throw": "OverhandThrow",
+    "tech": "Hit_Chest",
+    "win": "Idle_FoldArms_Loop",
+    "idle": {
+      "clip": "CMU_Boxing_13_18",
+      "loop": true
+    },
+    "run": "Sprint_Loop"
+  },
+  "moves": {
+    "5LP": {
+      "clip": "Punch_Jab",
+      "contact": 15
+    },
+    "2LP": {
+      "clip": "Punch_Jab",
+      "contact": 15
+    },
+    "j.LP": {
+      "clip": "Punch_Jab",
+      "contact": 15
+    },
+    "5MP": {
+      "clip": "Punch_Cross",
+      "contact": 20
+    },
+    "2MP": {
+      "clip": "Punch_Cross",
+      "contact": 20
+    },
+    "j.MP": {
+      "clip": "Punch_Cross",
+      "contact": 20
+    },
+    "5HP": {
+      "clip": "Melee_Hook",
+      "contact": 14
+    },
+    "2HP": {
+      "clip": "Melee_Hook",
+      "contact": 14
+    },
+    "j.HP": {
+      "clip": "Melee_Hook",
+      "contact": 14
+    },
+    "6MP": {
+      "clip": "Melee_Hook",
+      "contact": 14
+    },
+    "5LK": {
+      "clip": "CMU_Kick_74_03"
+    },
+    "2LK": {
+      "clip": "CMU_Kick_74_03"
+    },
+    "5MK": {
+      "clip": "CMU_Kick_74_05"
+    },
+    "2MK": {
+      "clip": "CMU_Kick_74_05"
+    },
+    "5HK": {
+      "clip": "CMU_Kick_74_06"
+    },
+    "2HK": {
+      "clip": "Slide_Start"
+    },
+    "j.LK": {
+      "clip": "CMU_JumpKick_75_16"
+    },
+    "j.MK": {
+      "clip": "CMU_JumpKick_75_16"
+    },
+    "j.HK": {
+      "clip": "CMU_JumpKick_75_16"
+    },
+    "236P": {
+      "clip": "Shield_Dash"
+    },
+    "236PP": {
+      "clip": "Shield_Dash"
+    },
+    "236K": {
+      "clip": "Slide_Start"
+    },
+    "214K": {
+      "clip": "CMU_JumpSpinKick_88_06"
+    },
+    "623P": {
+      "clip": "NinjaJump_Start"
+    },
+    "623PP": {
+      "clip": "NinjaJump_Start"
+    },
+    "236236K": {
+      "clip": "CMU_JumpSpinKick_87_01"
+    },
+    "throw_f": {
+      "clip": "OverhandThrow"
+    },
+    "throw_b": {
+      "clip": "OverhandThrow"
+    },
+    "dash": {
+      "clip": "Jog_Fwd_Loop"
+    },
+    "backdash": {
+      "clip": "Roll",
+      "reverse": true
+    },
+    "arrebentacao": {
+      "clip": "Shield_Dash"
+    },
+    "contracorrente": {
+      "clip": "Shield_OneShot"
+    }
+  }
+}
