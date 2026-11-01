@@ -57,6 +57,9 @@ Font g_font;
 bool g_font_loaded = false;
 
 void text(const std::string& s, float x, float y, float size, Color c) {
+  // sombra para ler sobre o céu e a arena
+  const float o = std::max(1.0f, size / 14.0f);
+  DrawTextEx(g_font, s.c_str(), {x + o, y + o}, size, size / 16.0f, {0, 0, 0, static_cast<unsigned char>(c.a * 0.75f)});
   DrawTextEx(g_font, s.c_str(), {x, y}, size, size / 16.0f, c);
 }
 float text_width(const std::string& s, float size) { return MeasureTextEx(g_font, s.c_str(), size, size / 16.0f).x; }
