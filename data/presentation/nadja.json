@@ -1,0 +1,224 @@
+// Apresentação: liga estados e golpes do núcleo a clipes de animação (60 quadros/s).
+// contact = quadro do clipe que coincide com o primeiro frame ativo do golpe. Gerado e ajustado à mão.
+{
+  "model": "characters/nadja.glb",
+  "animations": [
+    "animations/ual.glb",
+    "animations/kicks.glb",
+    "animations/nadja_golpes.glb"
+  ],
+  "scale_milli": 1000,
+  "states": {
+    "walk_forward": {
+      "clip": "Nadja_Anda",
+      "loop": true
+    },
+    "walk_back": {
+      "clip": "Nadja_Anda",
+      "reverse": true,
+      "loop": true
+    },
+    "crouch": {
+      "clip": "Nadja_Agachada",
+      "loop": true
+    },
+    "jump_start": {
+      "clip": "Nadja_PuloInicio"
+    },
+    "jump": {
+      "clip": "Nadja_PuloAr",
+      "loop": true
+    },
+    "land": {
+      "clip": "Nadja_Aterrissa"
+    },
+    "hit": {
+      "clip": "Nadja_Hit"
+    },
+    "hit_crouch": {
+      "clip": "Nadja_Hit"
+    },
+    "block": {
+      "clip": "Nadja_Bloqueio"
+    },
+    "block_crouch": {
+      "clip": "Nadja_AgBloqueio"
+    },
+    "guard": {
+      "clip": "Nadja_Bloqueio"
+    },
+    "juggle": "Hit_Knockback",
+    "knockdown": {
+      "clip": "Nadja_Queda"
+    },
+    "ko": {
+      "clip": "Nadja_Derrota"
+    },
+    "wakeup": {
+      "clip": "Nadja_Levanta"
+    },
+    "thrown": {
+      "clip": "Nadja_Arremessada"
+    },
+    "throw": {
+      "clip": "Nadja_ChaveQuadril",
+      "contact": 16
+    },
+    "tech": {
+      "clip": "Nadja_Hit"
+    },
+    "win": {
+      "clip": "Nadja_Vitoria"
+    },
+    "idle": {
+      "clip": "Nadja_Guarda",
+      "loop": true
+    },
+    "run": {
+      "clip": "Nadja_Corre",
+      "loop": true
+    }
+  },
+  "moves": {
+    "5LP": {
+      "clip": "Nadja_Jab",
+      "contact": 4
+    },
+    "2LP": {
+      "clip": "Nadja_AgSocoLeve",
+      "contact": 4
+    },
+    "j.LP": {
+      "clip": "Nadja_AereoSoco",
+      "contact": 5
+    },
+    "5MP": {
+      "clip": "Nadja_Direto",
+      "contact": 7
+    },
+    "2MP": {
+      "clip": "Nadja_AgSocoMedio",
+      "contact": 7
+    },
+    "j.MP": {
+      "clip": "Nadja_AereoSoco",
+      "contact": 5
+    },
+    "5HP": {
+      "clip": "Nadja_Gancho",
+      "contact": 9
+    },
+    "2HP": {
+      "clip": "Nadja_Upper",
+      "contact": 8
+    },
+    "j.HP": {
+      "clip": "Nadja_AereoSoco",
+      "contact": 5
+    },
+    "6MP": {
+      "clip": "Nadja_Gancho",
+      "contact": 9
+    },
+    "5LK": {
+      "clip": "Nadja_ChuteBaixo",
+      "contact": 5
+    },
+    "2LK": {
+      "clip": "Nadja_AgChuteLeve",
+      "contact": 5
+    },
+    "5MK": {
+      "clip": "Nadja_ChuteMedio",
+      "contact": 10
+    },
+    "2MK": {
+      "clip": "Nadja_AgChuteMedio",
+      "contact": 8
+    },
+    "5HK": {
+      "clip": "Nadja_ChuteAlto",
+      "contact": 12
+    },
+    "2HK": {
+      "clip": "Nadja_Rasteira",
+      "contact": 10
+    },
+    "j.LK": {
+      "clip": "Nadja_AereoChute",
+      "contact": 6
+    },
+    "j.MK": {
+      "clip": "Nadja_AereoChute",
+      "contact": 6
+    },
+    "j.HK": {
+      "clip": "Nadja_AereoChute",
+      "contact": 6
+    },
+    "236P": {
+      "clip": "Shield_Dash",
+      "from": 0,
+      "contact": 13,
+      "to": 45
+    },
+    "236PP": {
+      "clip": "Shield_Dash",
+      "from": 0,
+      "contact": 13,
+      "to": 45
+    },
+    "236K": {
+      "clip": "Slide_Start",
+      "from": 6,
+      "contact": 15,
+      "to": 40
+    },
+    "214K": {
+      "clip": "CMU_JumpSpinKick_88_06",
+      "from": 0,
+      "contact": 34,
+      "to": 75
+    },
+    "623P": {
+      "clip": "Nadja_Upper",
+      "contact": 8
+    },
+    "623PP": {
+      "clip": "Nadja_Upper",
+      "contact": 8
+    },
+    "236236K": {
+      "clip": "CMU_JumpSpinKick_87_01",
+      "from": 74,
+      "contact": 124,
+      "to": 200
+    },
+    "throw_f": {
+      "clip": "Nadja_Agarra",
+      "contact": 4
+    },
+    "throw_b": {
+      "clip": "Nadja_Agarra",
+      "contact": 4
+    },
+    "dash": {
+      "clip": "Nadja_Dash"
+    },
+    "backdash": {
+      "clip": "Nadja_Recuo"
+    },
+    "arrebentacao": {
+      "clip": "Shield_Dash",
+      "from": 0,
+      "contact": 13,
+      "to": 45
+    },
+    "contracorrente": {
+      "clip": "Shield_OneShot",
+      "from": 10,
+      "contact": 35,
+      "to": 50
+    }
+  }
+}

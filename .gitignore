@@ -1,0 +1,5 @@
+build*/
+*.fgr
+.vscode/
+.idea/
+*.user

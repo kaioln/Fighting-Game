@@ -1,0 +1,214 @@
+// Apresentação: liga estados e golpes do núcleo a clipes de animação (60 quadros/s).
+// contact = quadro do clipe que coincide com o primeiro frame ativo do golpe. Gerado e ajustado à mão.
+{
+  "model": "characters/otto.glb",
+  "animations": [
+    "animations/ual.glb",
+    "animations/kicks.glb",
+    "animations/otto_golpes.glb"
+  ],
+  "scale_milli": 1050,
+  "states": {
+    "walk_forward": {
+      "clip": "Otto_Anda",
+      "loop": true
+    },
+    "walk_back": {
+      "clip": "Otto_Anda",
+      "reverse": true,
+      "loop": true
+    },
+    "crouch": {
+      "clip": "Otto_Agachada",
+      "loop": true
+    },
+    "jump_start": {
+      "clip": "Otto_PuloInicio"
+    },
+    "jump": {
+      "clip": "Otto_PuloAr",
+      "loop": true
+    },
+    "land": {
+      "clip": "Otto_Aterrissa"
+    },
+    "hit": {
+      "clip": "Otto_Hit"
+    },
+    "hit_crouch": {
+      "clip": "Otto_Hit"
+    },
+    "block": {
+      "clip": "Otto_Bloqueio"
+    },
+    "block_crouch": {
+      "clip": "Otto_AgBloqueio"
+    },
+    "guard": {
+      "clip": "Otto_Bloqueio"
+    },
+    "juggle": "Hit_Knockback",
+    "knockdown": {
+      "clip": "Otto_Queda"
+    },
+    "ko": {
+      "clip": "Otto_Derrota"
+    },
+    "wakeup": {
+      "clip": "Otto_Levanta"
+    },
+    "thrown": {
+      "clip": "Otto_Arremessado"
+    },
+    "throw": {
+      "clip": "Otto_Arremesso",
+      "contact": 18
+    },
+    "tech": {
+      "clip": "Otto_Hit"
+    },
+    "win": {
+      "clip": "Otto_Vitoria"
+    },
+    "idle": {
+      "clip": "Otto_Guarda",
+      "loop": true
+    },
+    "run": {
+      "clip": "Otto_Corre",
+      "loop": true
+    }
+  },
+  "moves": {
+    "5LP": {
+      "clip": "Otto_Jab",
+      "contact": 6
+    },
+    "2LP": {
+      "clip": "Otto_AgSocoLeve",
+      "contact": 4
+    },
+    "j.LP": {
+      "clip": "Otto_AereoSoco",
+      "contact": 4
+    },
+    "5MP": {
+      "clip": "Otto_Martelo",
+      "contact": 10
+    },
+    "2MP": {
+      "clip": "Otto_AgSocoMedio",
+      "contact": 6
+    },
+    "j.MP": {
+      "clip": "Otto_AereoPunho",
+      "contact": 6
+    },
+    "5HP": {
+      "clip": "Otto_Cabecada",
+      "contact": 9
+    },
+    "2HP": {
+      "clip": "Otto_AgUpper",
+      "contact": 8
+    },
+    "j.HP": {
+      "clip": "Otto_AereoMarreta",
+      "contact": 9
+    },
+    "6HP": {
+      "clip": "Otto_Marreta",
+      "contact": 19
+    },
+    "5LK": {
+      "clip": "Otto_ChuteBaixo",
+      "contact": 5
+    },
+    "2LK": {
+      "clip": "Otto_AgChuteLeve",
+      "contact": 5
+    },
+    "5MK": {
+      "clip": "Otto_ChuteMedio",
+      "contact": 8
+    },
+    "2MK": {
+      "clip": "Otto_AgChuteMedio",
+      "contact": 7
+    },
+    "5HK": {
+      "clip": "Otto_ChuteAlto",
+      "contact": 13
+    },
+    "2HK": {
+      "clip": "Otto_Rasteira",
+      "contact": 10
+    },
+    "j.LK": {
+      "clip": "Otto_AereoJoelho",
+      "contact": 4
+    },
+    "j.MK": {
+      "clip": "Otto_AereoChute",
+      "contact": 6
+    },
+    "j.HK": {
+      "clip": "Otto_AereoPisao",
+      "contact": 9
+    },
+    "360P": {
+      "clip": "Otto_Agarrao",
+      "contact": 8
+    },
+    "360PP": {
+      "clip": "Otto_Agarrao",
+      "contact": 8
+    },
+    "236P": {
+      "clip": "Otto_Investida",
+      "contact": 13
+    },
+    "236PP": {
+      "clip": "Otto_InvestidaEX",
+      "contact": 11
+    },
+    "214K": {
+      "clip": "Otto_Pisao",
+      "contact": 15
+    },
+    "623P": {
+      "clip": "Otto_Upper",
+      "contact": 7
+    },
+    "236236P": {
+      "clip": "Otto_Super",
+      "contact": 7
+    },
+    "throw_f": {
+      "clip": "Otto_Arremesso",
+      "contact": 18
+    },
+    "throw_b": {
+      "clip": "Otto_Arremesso",
+      "contact": 18
+    },
+    "dash": {
+      "clip": "Otto_Dash"
+    },
+    "backdash": {
+      "clip": "Otto_Recuo"
+    },
+    "arrebentacao": {
+      "clip": "Shield_Dash",
+      "from": 0,
+      "contact": 13,
+      "to": 45
+    },
+    "contracorrente": {
+      "clip": "Shield_OneShot",
+      "from": 10,
+      "contact": 35,
+      "to": 50
+    }
+  }
+}
