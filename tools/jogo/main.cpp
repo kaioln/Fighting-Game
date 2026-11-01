@@ -330,6 +330,7 @@ struct App {
   MatchState state{};
   fg::MatchSetup setup;
   bool training = true;
+  bool infinite_meter = false;  // treino: barra de super sempre cheia (F10)
   Dummy dummy = Dummy::Human;
   bool paused = false;
   bool show_help = false;
@@ -1074,6 +1075,7 @@ void draw_help(const App& a, const View& v) {
   line("F3  comportamento do P2                    F4  recomeçar");
   line("F5  pausar        F6  avançar 1 frame (pausado)        F7 / F8  trocar personagem P1 / P2");
   line("F9  mostrar caixas de colisão (treino)       Tab  esta ajuda");
+  line(std::string("F10 barra de super infinita (treino): ") + (a.infinite_meter ? "ligada" : "desligada"), kText, 18);
   ty += 6;
   line("Comandos: 236 = baixo, baixo-frente, frente. 623 = frente, baixo, baixo-frente.", kDim, 17);
   line("Maré alta: MP+MK cancela um normal que fez contato (Arrebentação).", kDim, 17);
@@ -1391,6 +1393,7 @@ int main(int argc, char** argv) {
       load_fighter(p);
     }
     if (IsKeyPressed(KEY_F9)) app.show_boxes = !app.show_boxes;
+    if (IsKeyPressed(KEY_F10)) app.infinite_meter = !app.infinite_meter;
     if (app.state.phase == fg::Phase::MatchEnd && IsKeyPressed(KEY_ENTER)) app.restart();
 
     fg::FrameInput in;
@@ -1410,6 +1413,8 @@ int main(int argc, char** argv) {
       in.p[0] = static_cast<InputBits>(read_keys(kKeysP1) | read_pad(0));
       if (app.dummy == Dummy::Human) in.p[1] = static_cast<InputBits>(read_keys(kKeysP2) | read_pad(1));
       else in.p[1] = dummy_input(app.dummy, app.state.f[1]);
+      if (app.training && app.infinite_meter)
+        for (auto& fi : app.state.f) fi.meter = fg::max_meter(app.data.rules);
     }
 
     const bool advance = !app.paused || IsKeyPressed(KEY_F6);
