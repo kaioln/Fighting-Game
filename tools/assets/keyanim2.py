@@ -190,11 +190,11 @@ N = {
                                     hand_r=(-0.25, 0.10, SH_Z - 0.40), foot_l_yaw=100)), (22, NC)], 8),
     # rasteira: gira rente ao chão
     "Nadja_Rasteira": ([(0, NC), (4, nc(pelvis_dz=-0.55, pelvis_yaw=70, spine_yaw=-20, spine_pitch=28,
-                                       hand_l=(0.30, -0.30, 0.30), hand_r=(0.05, -0.20, 0.30), foot_r=(-0.30, 0.20, 0.15), foot_r_pitch=40)),
+                                       hand_l=(0.30, -0.30, 0.30), hand_r=(0.05, -0.20, 0.30), foot_r=(-0.30, 0.20, 0.16), foot_r_pitch=-15)),
                         (10, nc(pelvis_dz=-0.58, pelvis_yaw=150, spine_yaw=-40, spine_pitch=30, hand_l=(0.30, -0.10, 0.25),
-                                hand_r=(0.10, -0.25, 0.25), foot_r=(0.20, -1.05, 0.15), foot_r_yaw=150, foot_r_pitch=80)),
+                                hand_r=(0.10, -0.25, 0.25), foot_r=(0.20, -1.05, 0.21), foot_r_yaw=150, foot_r_pitch=55)),
                         (14, nc(pelvis_dz=-0.58, pelvis_yaw=160, spine_yaw=-40, spine_pitch=30, hand_l=(0.30, -0.10, 0.25),
-                                hand_r=(0.10, -0.25, 0.25), foot_r=(0.35, -0.95, 0.15), foot_r_yaw=160, foot_r_pitch=80)),
+                                hand_r=(0.10, -0.25, 0.25), foot_r=(0.35, -0.95, 0.21), foot_r_yaw=160, foot_r_pitch=55)),
                         (30, NC)], 10),
     "Nadja_PuloInicio": ([(0, NG), (4, ng(pelvis_dz=-0.20, spine_pitch=14, hand_l=(0.12, -0.25, SH_Z - 0.10))),
                           (6, ng(pelvis_dz=-0.02, spine_pitch=-4, foot_l_pitch=-30, foot_r_pitch=-30))], None),
@@ -381,11 +381,11 @@ O["Otto_AgChuteMedio"] = ([(0, OC), (4, oc(foot_r=(-0.08, 0.05, 0.25), foot_r_pi
                                    hand_r=(-0.30, 0.08, SH_Z - 0.46), foot_l_yaw=95)), (26, OC)], 7)
 # 2HK: rasteira pesada, gira rente ao chão
 O["Otto_Rasteira"] = ([(0, OC), (5, oc(pelvis_dz=-0.52, pelvis_yaw=70, spine_yaw=-20, spine_pitch=30,
-                                       hand_l=(0.36, -0.30, 0.32), hand_r=(0.05, -0.22, 0.32), foot_r=(-0.32, 0.20, 0.15), foot_r_pitch=40)),
+                                       hand_l=(0.36, -0.30, 0.32), hand_r=(0.05, -0.22, 0.32), foot_r=(-0.32, 0.20, 0.16), foot_r_pitch=-15)),
                        (10, oc(pelvis_dz=-0.55, pelvis_yaw=150, spine_yaw=-40, spine_pitch=32, hand_l=(0.36, -0.10, 0.28),
-                               hand_r=(0.10, -0.25, 0.28), foot_r=(0.20, -1.05, 0.15), foot_r_yaw=150, foot_r_pitch=80)),
+                               hand_r=(0.10, -0.25, 0.28), foot_r=(0.20, -1.05, 0.21), foot_r_yaw=150, foot_r_pitch=55)),
                        (14, oc(pelvis_dz=-0.55, pelvis_yaw=160, spine_yaw=-40, spine_pitch=32, hand_l=(0.36, -0.10, 0.28),
-                               hand_r=(0.10, -0.25, 0.28), foot_r=(0.35, -0.95, 0.15), foot_r_yaw=160, foot_r_pitch=80)),
+                               hand_r=(0.10, -0.25, 0.28), foot_r=(0.35, -0.95, 0.21), foot_r_yaw=160, foot_r_pitch=55)),
                        (38, OC)], 10)
 # pulo
 O["Otto_PuloInicio"] = ([(0, OG), (4, og(pelvis_dz=-0.24, spine_pitch=20, hand_l=(0.30, -0.25, SH_Z - 0.22))),

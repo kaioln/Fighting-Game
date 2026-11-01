@@ -330,6 +330,73 @@ for v in gen.data.vertices:
     legged += 1
 print("LEG_SEGMENT_WEIGHTS", legged)
 
+# Otto: o avental vira peça própria. O gerador funde o couro com a coxa: qualquer peso na emenda rasgava em
+# lasca no chute alto. As faces do avental (todos os vértices presos ao quadril acima) são descoladas da
+# perna; o furo que fica na perna é tampado; o avental continua com os pesos de quadril.
+if NAME == "otto" and pinned_set:
+    bm = bmesh.new()
+    bm.from_mesh(gen.data)
+    flay = bm.faces.layers.int.new("avental")  # antes de coletar faces: criar camada invalida as referências
+    bm.verts.ensure_lookup_table()
+    z0_, z1_ = B["calf_l"].z - 0.10, B["thigh_l"].z + 0.05
+
+    def front_panel(f):
+        c_ = f.calc_center_median()
+        return z0_ < c_.z < z1_ and abs(c_.x) < 0.40 and c_.y < B["pelvis"].y - 0.12
+
+    sel = {f for f in bm.faces if all(v.index in pinned_set for v in f.verts) or front_panel(f)}
+    # a placa do avental tem espessura e face de dentro: a seleção cresce pela malha até elas, sem entrar na
+    # superfície da perna (perto do eixo)
+    for _ in range(6):
+        add = set()
+        for f in sel:
+            for e in f.edges:
+                for g in e.link_faces:
+                    if g in sel or g in add:
+                        continue
+                    c_ = g.calc_center_median()
+                    if z0_ - 0.04 < c_.z < z1_ and c_.y < B["pelvis"].y + 0.02 and leg_axis_dist(c_) > 0.13:
+                        add.add(g)
+        if not add:
+            break
+        sel |= add
+    # recorte sem serrilha e sem janelas: face com 2+ vizinhas do avental entra, com 1 ou nenhuma sai
+    for _ in range(4):
+        nb = {f: sum(1 for e in f.edges for g in e.link_faces if g is not f and g in sel) for f in bm.faces}
+        sel = {f for f in bm.faces if nb[f] >= 2}
+    apron = list(sel)
+    for f in apron:
+        f[flay] = 1
+    bmesh.ops.split(bm, geom=apron, use_only_faces=True)
+    # pesos do avental separado: quadril, com um pouco da coxa do mesmo lado crescendo do centro (0) para as
+    # bordas (35%) e para baixo. Rígido de todo, a coxa da frente atravessava o couro já na guarda; solto, ele
+    # dobra sem rasgar porque não está mais costurado na perna.
+    dl = bm.verts.layers.deform.verify()
+    gi = {g.name: g.index for g in gen.vertex_groups}
+    for v in {v for f in bm.faces if f[flay] for v in f.verts}:
+        v[dl].clear()
+        t_ = min(1.0, abs(v.co.x) / 0.20) * min(1.0, max(0.0, (z1_ - v.co.z) / 0.25))
+        v[dl][gi["pelvis"]] = 1.0 - 0.35 * t_
+        if t_ > 0:
+            v[dl][gi["thigh_l" if v.co.x > 0 else "thigh_r"]] = 0.35 * t_
+    # tampa só os furos do lado do corpo (bordas cujas faces não são do avental)
+    bm.edges.ensure_lookup_table()
+    body_bnd = [e for e in bm.edges if e.is_boundary and not any(f[flay] for f in e.link_faces)]
+    caps = bmesh.ops.holes_fill(bm, edges=body_bnd, sides=600)["faces"]
+    uvl_bm = bm.loops.layers.uv.active
+    cset = set(caps)
+    for f in caps:
+        for lp in f.loops:
+            other = next((x for x in lp.vert.link_loops if x.face not in cset), None)
+            if other is not None and uvl_bm is not None:
+                lp[uvl_bm].uv = other[uvl_bm].uv
+    if caps:
+        bmesh.ops.triangulate(bm, faces=caps, quad_method="BEAUTY", ngon_method="BEAUTY")
+    bm.to_mesh(gen.data)
+    bm.free()
+    gen.data.update()
+    print("APRON_SPLIT caps", len(caps))
+
 # 4b. limpeza dos pesos (malha contínua, pose A)
 gnames = [g.name for g in gen.vertex_groups]
 NV, NG = len(gen.data.vertices), len(gnames)
@@ -469,7 +536,9 @@ print("SMALL_PIECES_REMOVED_VERTS", len(small))
 # fecha os furos que o corte deixou (axilas). Tampa que juntaria partes diferentes (braço e tronco, as duas
 # pernas) refaria a película: fica de fora. UV da tampa = UV que o vértice já tem em outra face.
 bm.edges.ensure_lookup_table()
-filled = bmesh.ops.holes_fill(bm, edges=[e for e in bm.edges if e.is_boundary], sides=160)["faces"]
+flay = bm.faces.layers.int.get("avental")
+filled = bmesh.ops.holes_fill(bm, edges=[e for e in bm.edges if e.is_boundary and not (
+    flay is not None and any(f[flay] for f in e.link_faces))], sides=160)["faces"]  # a borda do avental fica aberta
 mixed = []
 for f in filled:
     labs = [v[lay] for v in f.verts]
