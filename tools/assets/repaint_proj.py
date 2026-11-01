@@ -3,10 +3,14 @@
 O personagem é posto na pose A em que foi gerado (os ângulos medidos por rig_gen3d.py), a silhueta da malha
 é alinhada à silhueta de cada vista pela caixa envolvente, e cada texel da textura recebe a cor da vista
 para onde a sua face aponta (peso pela normal, com teste de profundidade). Onde nenhuma vista enxerga
-(laterais, axilas, debaixo do queixo) a textura antiga fica, com as cores ajustadas à média e ao contraste da
-pintura nova. As costuras das ilhas de UV são estendidas para fora (sem fio escuro no mip-map).
+(axilas, debaixo do queixo, a coxa atrás do avental) a cor pintada vizinha se espalha pela superfície da malha. As costuras das ilhas de UV são estendidas para fora (sem fio escuro no mip-map).
 
-Uso: bl.sh --python repaint_proj.py -- <char.glb> <frente.png> <costas.png> <theta> <phi> <out.glb> <prev.png>
+Rosto (opcional, <rosto.png>): close frontal da cabeça pintado a partir da vista de frente. O close é registrado na
+vista de frente por correlação (escala e posição), a cabeça é realinhada à silhueta da cabeça na vista (o
+alinhamento pelo corpo inteiro errava alguns pixels no rosto: sobrancelha dupla, riscos) e a frente da cabeça é
+amostrada do close, sem mistura com a textura gerada.
+
+Uso: bl.sh --python repaint_proj.py -- <char.glb> <frente.png> <costas.png> <theta> <phi> <out.glb> <prev.png> [<rosto.png>]
 theta = graus dos braços abaixo da horizontal, phi = graus das pernas para fora (POSE_A no log do rig_gen3d).
 """
 import math
@@ -16,7 +20,9 @@ import bpy
 import numpy as np
 from mathutils import Matrix
 
-CH, FRONT, BACK, THETA, PHI, OUT, PREV = sys.argv[sys.argv.index("--") + 1:]
+_a = sys.argv[sys.argv.index("--") + 1:]
+CH, FRONT, BACK, THETA, PHI, OUT, PREV = _a[:7]
+FACE = _a[7] if len(_a) > 7 else None
 THETA, PHI = float(THETA), float(PHI)
 TEX = 2048
 
@@ -59,6 +65,18 @@ def load(path):
 def silhouette_box(px):
     bg = px[2:6, 2:6].reshape(-1, 3).mean(axis=0)
     m = np.abs(px - bg).max(axis=2) > 0.08
+    # fundo = o que se liga à borda da imagem por pixels claros e pouco saturados (pega a sombra cinza no vão
+    # entre as pernas, que passava no limiar simples e virava uma lâmina clara na face interna da perna)
+    lightish = (px.min(axis=2) > 0.55) & (px.max(axis=2) - px.min(axis=2) < 0.10)
+    bgm = np.zeros(m.shape, dtype=bool)
+    bgm[0, :] = bgm[-1, :] = bgm[:, 0] = bgm[:, -1] = True
+    bgm &= lightish | ~m
+    for _ in range(2000):
+        grow = (np.roll(bgm, 1, 0) | np.roll(bgm, -1, 0) | np.roll(bgm, 1, 1) | np.roll(bgm, -1, 1)) & (lightish | ~m)
+        if (grow & ~bgm).sum() == 0:
+            break
+        bgm |= grow
+    m &= ~bgm
     ys, xs = np.nonzero(m)
     return xs.min(), xs.max(), ys.min(), ys.max(), m
 
@@ -98,10 +116,62 @@ def project(px, sign):
         z = l1 * depth[a] + l2 * depth[b] + l3 * depth[c]
         sub = zbuf[by0:by1 + 1, bx0:bx1 + 1]
         np.maximum(sub, np.where(ins, z, -1e9), out=sub)
-    return dict(px=px, ix=ix, iy=iy, mxs=-sign, zbuf=zbuf, sil=sil)
+    return dict(px=px, ix=ix, iy=iy, mxs=-sign, zbuf=zbuf, sil=sil, silfull=silhouette_box(px)[4])
 
 
 views = [(project(load(FRONT), -1), -1), (project(load(BACK), +1), +1)]
+
+face = None
+if FACE:
+    fv = views[0][0]
+    neck_z = (arm.matrix_world @ arm.pose.bones["neck_01"].head).z
+    hm = P[:, 2] > neck_z + 0.02
+    Xm, Ym = fv["ix"](P[hm, 0]), fv["iy"](P[hm, 2])
+    neck_row = fv["iy"](neck_z)
+    top_m = Ym.min()
+    band = (Ym > top_m + 0.35 * (neck_row - top_m)) & (Ym < top_m + 0.65 * (neck_row - top_m))
+    x0m, x1m = Xm[band].min(), Xm[band].max()
+    sf = fv["silfull"]
+    cx = int((x0m + x1m) / 2)
+    win = sf[:, max(0, cx - 80):cx + 80]
+    rows = np.nonzero(win[:int(neck_row)].any(axis=1))[0]
+    top_i = rows.min()
+    bi = (np.arange(sf.shape[0]) > top_i + 0.35 * (neck_row - top_i)) & (np.arange(sf.shape[0]) < top_i + 0.65 * (neck_row - top_i))
+    cols = np.nonzero(win[bi].any(axis=0))[0] + max(0, cx - 80)
+    x0i, x1i = cols.min(), cols.max()
+    k = (x1i - x0i) / max(x1m - x0m, 1e-6)
+    cxm_, cxi_ = (x0m + x1m) / 2, (x0i + x1i) / 2
+    # vista de frente -> close: correlação normalizada em escala e posição
+    C = load(FACE).mean(axis=2)
+    Fg = fv["px"].mean(axis=2)
+    fy0, fy1 = int(top_i) - 3, int(neck_row) + 4
+    hw = int((x1i - x0i) * 0.8)
+    fx0, fx1 = int(cxi_) - hw, int(cxi_) + hw
+    F = Fg[fy0:fy1, fx0:fx1]
+    F = (F - F.mean()) / (F.std() + 1e-6)
+    best = (-2, None)
+    for sc in np.arange(3.0, 12.0, 0.1):
+        ys_ = (np.arange(int(C.shape[0] / sc)) + 0.5) * sc
+        xs_ = (np.arange(int(C.shape[1] / sc)) + 0.5) * sc
+        if len(ys_) < F.shape[0] or len(xs_) < F.shape[1]:
+            continue
+        Cs = np.zeros((len(ys_), len(xs_)), dtype=np.float32)
+        for oy in (-0.25, 0.25):
+            for ox in (-0.25, 0.25):
+                Cs += C[np.clip((ys_ + oy * sc).astype(int), 0, C.shape[0] - 1)][:, np.clip((xs_ + ox * sc).astype(int), 0, C.shape[1] - 1)]
+        Cs /= 4
+        Wv = np.lib.stride_tricks.sliding_window_view(Cs, F.shape)
+        mu = Wv.mean(axis=(2, 3))
+        sd = Wv.std(axis=(2, 3)) + 1e-6
+        ncc = ((Wv * F).mean(axis=(2, 3)) - mu * F.mean()) / sd
+        j = np.unravel_index(ncc.argmax(), ncc.shape)
+        if ncc[j] > best[0]:
+            best = (float(ncc[j]), (sc, j[0], j[1]))
+    sc, oy, ox = best[1]
+    print("FACE_REG ncc %.3f scale %.2f head_k %.3f" % (best[0], sc, k))
+    face = dict(px=load(FACE), sc=sc, oy=oy, ox=ox, fy0=fy0, fx0=fx0, neck_z=neck_z,
+                X=lambda X: cxi_ + (X - cxm_) * k, Y=lambda Y: top_i + (Y - top_m) * k)
+facem = np.zeros((TEX, TEX), dtype=bool)
 
 # rasteriza cada triângulo no espaço UV: posição 3D, normal e cor das vistas
 col = np.zeros((TEX, TEX, 3), dtype=np.float32)
@@ -145,7 +215,24 @@ for t in range(len(tris)):
         if not vis.any():
             continue
         wv = np.where(vis, wgt ** 1.5, 0.0).astype(np.float32)
-        np.add.at(col, (gy, gx), v["px"][yi, xi] * wv[:, None])
+        cv = v["px"][yi, xi]
+        if face is not None and sign < 0 and facing > 0.0:
+            hd = (pos[:, 2] > face["neck_z"] + 0.03) & vis
+            if hd.any():
+                # cabeça realinhada à silhueta e amostrada do close (bilinear)
+                Xh, Yh = face["X"](X[hd]), face["Y"](Y[hd])
+                cxc = (Xh - face["fx0"] + face["ox"] + 0.5) * face["sc"] - 0.5
+                cyc = (Yh - face["fy0"] + face["oy"] + 0.5) * face["sc"] - 0.5
+                fp = face["px"]
+                x0_ = np.clip(np.floor(cxc).astype(int), 0, fp.shape[1] - 2)
+                y0_ = np.clip(np.floor(cyc).astype(int), 0, fp.shape[0] - 2)
+                tx, ty = (cxc - x0_).clip(0, 1)[:, None], (cyc - y0_).clip(0, 1)[:, None]
+                cv = cv.copy()
+                cv[hd] = (fp[y0_, x0_] * (1 - tx) * (1 - ty) + fp[y0_, x0_ + 1] * tx * (1 - ty) +
+                          fp[y0_ + 1, x0_] * (1 - tx) * ty + fp[y0_ + 1, x0_ + 1] * tx * ty)
+                wv = np.where(hd, wv * 4.0, wv)
+                facem[gy[hd], gx[hd]] = True
+        np.add.at(col, (gy, gx), cv * wv[:, None])
         np.add.at(wsum, (gy, gx), wv)
 print("TEXELS_COVERED", int(cov.sum()), "PROJECTED", int((wsum > 0.05).sum()))
 
@@ -158,13 +245,78 @@ if img.size[0] != TEX:
 old = np.array(img.pixels[:], dtype=np.float32).reshape(TEX, TEX, 4)
 proj = col / np.maximum(wsum, 1e-6)[..., None]
 alpha = np.clip(wsum / 0.6, 0, 1)
+alpha[facem] = 1.0  # rosto: só o close, sem fantasma da textura gerada
 # ajuste de cor da textura antiga (média e contraste) para casar com a pintura onde as duas existem
 m = (alpha > 0.8) & cov
 o_rgb = old[..., :3]
 mo, so = o_rgb[m].mean(axis=0), o_rgb[m].std(axis=0) + 1e-4
 mp, sp = proj[m].mean(axis=0), proj[m].std(axis=0) + 1e-4
 adj = np.clip((o_rgb - mo) / so * sp + mp, 0, 1)
-new = adj * (1 - alpha[..., None]) + proj * alpha[..., None]
+
+# Onde nenhuma vista enxerga (frente da coxa atrás do avental, axilas, debaixo do queixo) a textura gerada é
+# ruído colorido. A cor pintada dos vizinhos se espalha pela superfície da malha, vértice a vértice, e só um
+# pouco do relevo de luz da textura antiga fica por cima.
+# a malha importada vem partida nas costuras de UV: a propagação usa as posições soldadas
+_, wid = np.unique(np.round(P * 1e4).astype(np.int64), axis=0, return_inverse=True)
+wid = wid.ravel()
+NVt = int(wid.max()) + 1
+vcol = np.zeros((NVt, 3), dtype=np.float32)
+vw = np.zeros(NVt, dtype=np.float32)
+for t in range(len(tris)):
+    cu = uv[tloops[t]].mean(axis=0)
+    for k_ in range(3):
+        uu = (uv[tloops[t, k_]] * 0.6 + cu * 0.4) * (TEX - 1)  # um pouco para dentro do triângulo
+        xi_, yi_ = int(round(uu[0])), int(round(uu[1]))
+        if 0 <= xi_ < TEX and 0 <= yi_ < TEX and alpha[yi_, xi_] > 0.6:
+            vcol[wid[tris[t, k_]]] += proj[yi_, xi_]
+            vw[wid[tris[t, k_]]] += 1
+known = vw > 0
+vcol[known] /= vw[known][:, None]
+tw = wid[tris]
+eds = np.concatenate([tw[:, [0, 1]], tw[:, [1, 2]], tw[:, [2, 0]]])
+eds = np.concatenate([eds, eds[:, ::-1]])
+for _ in range(600):
+    if known.all():
+        break
+    acc_ = np.zeros_like(vcol)
+    cnt_ = np.zeros(NVt, dtype=np.float32)
+    ok_ = known[eds[:, 1]]
+    np.add.at(acc_, eds[ok_, 0], vcol[eds[ok_, 1]])
+    np.add.at(cnt_, eds[ok_, 0], 1)
+    grow_ = (~known) & (cnt_ > 0)
+    if not grow_.any():
+        break
+    vcol[grow_] = acc_[grow_] / cnt_[grow_][:, None]
+    known |= grow_
+print("VERTS_PAINTED", int((vw > 0).sum()), "SPREAD", int(known.sum() - (vw > 0).sum()), "OF", NVt)
+fill = adj.copy()
+lum_mean = float(adj[cov].mean())
+for t in range(len(tris)):
+    u = uv[tloops[t]] * (TEX - 1)
+    bx0, by0 = np.floor(u.min(axis=0)).astype(int)
+    bx1, by1 = np.ceil(u.max(axis=0)).astype(int)
+    if bx1 - bx0 > 300 or by1 - by0 > 300:
+        continue
+    gx, gy = np.meshgrid(np.arange(max(bx0, 0), min(bx1, TEX - 1) + 1), np.arange(max(by0, 0), min(by1, TEX - 1) + 1))
+    a, b, c = u
+    d = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1])
+    if abs(d) < 1e-12 or gx.size == 0:
+        continue
+    l1 = ((b[1] - c[1]) * (gx - c[0]) + (c[0] - b[0]) * (gy - c[1])) / d
+    l2 = ((c[1] - a[1]) * (gx - c[0]) + (a[0] - c[0]) * (gy - c[1])) / d
+    l3 = 1 - l1 - l2
+    ins = (l1 >= -0.02) & (l2 >= -0.02) & (l3 >= -0.02)
+    ins &= alpha[gy, gx] < 0.999
+    if not ins.any():
+        continue
+    gx, gy, l1, l2, l3 = gx[ins], gy[ins], l1[ins], l2[ins], l3[ins]
+    ia, ib, ic = tw[t]
+    if not (known[ia] and known[ib] and known[ic]):
+        continue  # peça solta sem nenhum vizinho pintado: fica a textura antiga ajustada
+    base = l1[:, None] * vcol[ia] + l2[:, None] * vcol[ib] + l3[:, None] * vcol[ic]
+    lum = adj[gy, gx].mean(axis=1, keepdims=True)
+    fill[gy, gx] = np.clip(base * (1.0 + 0.4 * (lum - lum_mean)), 0, 1)  # relevo da textura antiga, de leve
+new = fill * (1 - alpha[..., None]) + proj * alpha[..., None]
 # estende as ilhas para fora (16 passos) para as costuras não puxarem cor de fora no mip-map
 filled = cov.copy()
 for _ in range(16):

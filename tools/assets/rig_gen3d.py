@@ -230,6 +230,7 @@ def leg_axis_dist(p):
     return best
 
 
+pinned_set = set()
 if NAME == "otto":
     pinned = 0
     for v in gen.data.vertices:
@@ -247,8 +248,49 @@ if NAME == "otto":
         pel.add([v.index], 1.0 if front else 0.6, "REPLACE")
         if not front:
             gen.vertex_groups[side].add([v.index], 0.4, "REPLACE")
+        pinned_set.add(v.index)
         pinned += 1
     print("APRON_PINNED", pinned)
+
+# Pernas por segmento: a calça larga fica longe dos ossos e o calor misturava quadril, coxa e canela de um
+# jeito que, num chute, a perna inteira virava uma lâmina esticada. Cada vértice da perna segue o osso do
+# segmento mais próximo (eixo coxa e canela na pose A), com mistura curta no quadril e no joelho; botas
+# (abaixo do tornozelo) ficam com o calor.
+J = {n: arm.matrix_world @ arm.pose.bones[n].head for s_ in ("l", "r") for n in ("thigh_" + s_, "calf_" + s_, "foot_" + s_)}
+legged = 0
+for v in gen.data.vertices:
+    if v.index in pinned_set:
+        continue
+    if sum(g.weight for g in v.groups if gen.vertex_groups[g.group].name.startswith(ARMISH)) > 0.3:
+        continue
+    best = None
+    for s_ in ("l", "r"):
+        for seg, (a_, b_) in enumerate(((J["thigh_" + s_], J["calf_" + s_]), (J["calf_" + s_], J["foot_" + s_]))):
+            ab = b_ - a_
+            t_ = (v.co - a_).dot(ab) / ab.length_squared
+            d_ = (v.co - (a_ + ab * max(0.0, min(1.0, t_)))).length
+            if best is None or d_ < best[0]:
+                best = (d_, s_, seg, t_)
+    d_, s_, seg, t_ = best
+    if d_ > 0.30 or (seg == 0 and t_ < -0.05) or (seg == 1 and t_ > 1.0):
+        continue
+    t_ = max(0.0, t_)
+    w = {}
+    if seg == 0:
+        wp = max(0.0, 1.0 - t_ / 0.18) * 0.5   # quadril
+        wc = max(0.0, (t_ - 0.85) / 0.30)      # joelho
+        w["pelvis"], w["calf_" + s_], w["thigh_" + s_] = wp, wc, 1.0 - wp - wc
+    else:
+        wt = max(0.0, (0.15 - t_) / 0.30)      # joelho
+        wf = max(0.0, (t_ - 0.90) / 0.20)      # tornozelo
+        w["thigh_" + s_], w["foot_" + s_], w["calf_" + s_] = wt, wf, 1.0 - wt - wf
+    for g in list(v.groups):
+        gen.vertex_groups[g.group].remove([v.index])
+    for n, x in w.items():
+        if x > 0.0:
+            gen.vertex_groups[n].add([v.index], x, "REPLACE")
+    legged += 1
+print("LEG_SEGMENT_WEIGHTS", legged)
 
 # 4b. limpeza dos pesos (malha contínua, pose A)
 gnames = [g.name for g in gen.vertex_groups]

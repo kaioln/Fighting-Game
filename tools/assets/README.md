@@ -49,7 +49,9 @@ blender -b --factory-startup --python repaint_proj.py -- <personagem.glb> <frent
 blender -b --factory-startup --python keyanim2.py -- <repo>/assets/animations/ual.glb <pasta_saida> <pasta_previas>
 ```
 `theta`/`phi` = linha `POSE_A` do log do rig_gen3d (Otto 56,4/7,2; Nadja 55,8/10,5). As vistas ficam em
-`assets_src/repintura`. Capturas de um golpe: `fgjogo --smoke <png> --frames N --p2 "6*40 5*10 2 3 6+LP"`.
+`assets_src/repintura`; a Nadja leva o close do rosto como último argumento (`nadja_rosto_a.png`).
+Capturas de um golpe: `fgjogo --smoke <png> --frames N --p2 "6*40 5*10 2 3 6+LP"` (o neutro `5*10` evita que
+andar + 236 vire 623); `--barra` enche a barra de super.
 
 O esqueleto não muda: o personagem gerado é posto na pose A medida, recebe os pesos do corpo base posado igual,
 volta à T-pose de repouso e é preso no mesmo esqueleto. Limite da raylib: até 65.535 vértices por primitiva.

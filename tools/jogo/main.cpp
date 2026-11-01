@@ -1134,6 +1134,7 @@ struct Options {
   std::string smoke_out;  // --smoke <png>: roda uma luta roteirizada e salva uma captura
   int smoke_frames = 240;
   bool smoke_guard = false;  // --guard: no --smoke, o P2 fica parado segurando para trás (captura de bloqueio)
+  bool full_meter = false;   // --barra: no --smoke, barra de super cheia nos dois lados (captura do super)
   bool no_outline = false;   // --sem-contorno: desliga o contorno dos personagens (diagnóstico)
   std::string p2_script;     // --p2 "<roteiro>": no --smoke, o P1 fica parado e o P2 segue o roteiro (capturas)
 };
@@ -1196,6 +1197,7 @@ int main(int argc, char** argv) {
     else if (a == "--guard") opt.smoke_guard = true;
     else if (a == "--p2" && i + 1 < argc) opt.p2_script = argv[++i];
     else if (a == "--sem-contorno") opt.no_outline = true;
+    else if (a == "--barra") opt.full_meter = true;
   }
   const bool smoke = !opt.smoke_out.empty();
   // --anims <arquivo.glb>: lista os clipes de animação (ajuda a escrever data/presentation/*.json).
@@ -1398,6 +1400,8 @@ int main(int argc, char** argv) {
       // guarda só enquanto o P1 ataca (segurar para trás o tempo todo faria o P2 recuar até a parede)
       if (opt.smoke_guard)
         in.p[1] = smoke_frame % 90 >= 31 ? (app.state.f[1].facing > 0 ? btn::Left : btn::Right) : InputBits{0};
+      if (opt.full_meter)
+        for (auto& fi : app.state.f) fi.meter = fg::max_meter(app.data.rules);
       if (!opt.p2_script.empty()) {
         in.p[0] = 0;
         in.p[1] = script_input(opt.p2_script, smoke_frame, app.state.f[1].facing);
