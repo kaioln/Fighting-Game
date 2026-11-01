@@ -638,11 +638,15 @@ void main() {
 // normal e só com as faces de trás, numa cor escura tirada da própria textura.
 const char* kOutlineVS = R"(#version 330
 in vec3 vertexPosition; in vec2 vertexTexCoord; in vec3 vertexNormal;
-uniform mat4 mvp; uniform float outlineWidth;
+uniform mat4 matModel; uniform mat4 matView; uniform mat4 matProjection; uniform float outlineWidth;
 out vec2 fragTexCoord;
 void main() {
   fragTexCoord = vertexTexCoord;
-  gl_Position = mvp * vec4(vertexPosition + normalize(vertexNormal) * outlineWidth, 1.0);
+  // A casca também recua 12 cm para longe da câmera: só aparece na silhueta. Sem isso, camadas internas da
+  // malha gerada (avental sobre a camisa) furavam a superfície e viravam manchas pretas.
+  vec4 v = matView * matModel * vec4(vertexPosition + normalize(vertexNormal) * outlineWidth, 1.0);
+  v.z -= 0.12;
+  gl_Position = matProjection * v;
 })";
 
 const char* kOutlineFS = R"(#version 330
@@ -1130,7 +1134,46 @@ struct Options {
   std::string smoke_out;  // --smoke <png>: roda uma luta roteirizada e salva uma captura
   int smoke_frames = 240;
   bool smoke_guard = false;  // --guard: no --smoke, o P2 fica parado segurando para trás (captura de bloqueio)
+  bool no_outline = false;   // --sem-contorno: desliga o contorno dos personagens (diagnóstico)
+  std::string p2_script;     // --p2 "<roteiro>": no --smoke, o P1 fica parado e o P2 segue o roteiro (capturas)
 };
+
+// Roteiro do --p2: tokens separados por espaço, "<direção numérica>[+BOTÃO][*quadros]" (padrão 2 quadros),
+// direção relativa ao lado do lutador (6 = para a frente). Ex.: "6*40 2 3 6+LP" = anda, depois 236P.
+InputBits script_input(const std::string& script, int frame, int facing) {
+  int t = 0;
+  size_t i = 0;
+  while (i < script.size()) {
+    while (i < script.size() && script[i] == ' ') ++i;
+    size_t j = script.find(' ', i);
+    if (j == std::string::npos) j = script.size();
+    const std::string tok = script.substr(i, j - i);
+    i = j;
+    if (tok.empty()) continue;
+    int hold = 2;
+    std::string body = tok;
+    if (const size_t st = tok.find('*'); st != std::string::npos) {
+      hold = std::max(1, std::atoi(tok.c_str() + st + 1));
+      body = tok.substr(0, st);
+    }
+    if (frame >= t && frame < t + hold) {
+      InputBits b = 0;
+      const int d = body.empty() ? 5 : body[0] - '0';
+      const InputBits fwd = facing > 0 ? btn::Right : btn::Left, back = facing > 0 ? btn::Left : btn::Right;
+      if (d == 1 || d == 2 || d == 3) b |= btn::Down;
+      if (d == 7 || d == 8 || d == 9) b |= btn::Up;
+      if (d == 3 || d == 6 || d == 9) b |= fwd;
+      if (d == 1 || d == 4 || d == 7) b |= back;
+      static const std::pair<const char*, InputBits> kBtn[] = {{"LP", btn::LP}, {"MP", btn::MP}, {"HP", btn::HP},
+                                                               {"LK", btn::LK}, {"MK", btn::MK}, {"HK", btn::HK}};
+      for (const auto& [name, bit] : kBtn)
+        for (size_t k = body.find(name); k != std::string::npos; k = body.find(name, k + 1)) b |= bit;
+      return b;
+    }
+    t += hold;
+  }
+  return 0;
+}
 
 // Roteiro do modo --smoke (usado pela CI para conferir que tudo carrega e anima).
 InputBits smoke_input(int p, int frame) {
@@ -1151,6 +1194,8 @@ int main(int argc, char** argv) {
     if (a == "--smoke" && i + 1 < argc) opt.smoke_out = argv[++i];
     else if (a == "--frames" && i + 1 < argc) opt.smoke_frames = std::max(1, std::atoi(argv[++i]));
     else if (a == "--guard") opt.smoke_guard = true;
+    else if (a == "--p2" && i + 1 < argc) opt.p2_script = argv[++i];
+    else if (a == "--sem-contorno") opt.no_outline = true;
   }
   const bool smoke = !opt.smoke_out.empty();
   // --anims <arquivo.glb>: lista os clipes de animação (ajuda a escrever data/presentation/*.json).
@@ -1213,6 +1258,9 @@ int main(int argc, char** argv) {
   const int loc_stint = GetShaderLocation(lit, "shadowTint");
   Shader outline = LoadShaderFromMemory(kOutlineVS, kOutlineFS);
   const int loc_owidth = GetShaderLocation(outline, "outlineWidth");
+  outline.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(outline, "matModel");
+  outline.locs[SHADER_LOC_MATRIX_VIEW] = GetShaderLocation(outline, "matView");
+  outline.locs[SHADER_LOC_MATRIX_PROJECTION] = GetShaderLocation(outline, "matProjection");
 
   Fighter3D fighters[2];
   ArenaLook arena_look;
@@ -1350,6 +1398,10 @@ int main(int argc, char** argv) {
       // guarda só enquanto o P1 ataca (segurar para trás o tempo todo faria o P2 recuar até a parede)
       if (opt.smoke_guard)
         in.p[1] = smoke_frame % 90 >= 31 ? (app.state.f[1].facing > 0 ? btn::Left : btn::Right) : InputBits{0};
+      if (!opt.p2_script.empty()) {
+        in.p[0] = 0;
+        in.p[1] = script_input(opt.p2_script, smoke_frame, app.state.f[1].facing);
+      }
     } else {
       in.p[0] = static_cast<InputBits>(read_keys(kKeysP1) | read_pad(0));
       if (app.dummy == Dummy::Human) in.p[1] = static_cast<InputBits>(read_keys(kKeysP2) | read_pad(1));
@@ -1424,7 +1476,7 @@ int main(int argc, char** argv) {
       Color tint = g.look.tint;
       if (app.setup.character[0] == app.setup.character[1] && p == 1) tint = {205, 215, 255, 255};
       DrawModelEx(g.model, pos, {0, 1, 0}, yaw, {g.look.scale, g.look.scale, g.look.scale}, tint);
-      if (outline.id != 0) {
+      if (outline.id != 0 && !opt.no_outline) {
         const float width = 0.006f / std::max(0.01f, g.look.scale);  // ~6 mm no mundo
         SetShaderValue(outline, loc_owidth, &width, SHADER_UNIFORM_FLOAT);
         for (int i = 0; i < g.model.materialCount; ++i) g.model.materials[i].shader = outline;

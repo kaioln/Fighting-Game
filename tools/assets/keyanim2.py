@@ -297,12 +297,188 @@ O = {
                            hand_r=(0.0, -0.45, SH_Z + 0.50), hand_l=(0.32, -0.20, SH_Z), pole_up=0.6, foot_r_pitch=-30)),
                     (11, og(pelvis_dz=0.02, spine_pitch=-14, spine_yaw=20, pelvis_shift=(0, -0.08, 0),
                             hand_r=(0.0, -0.40, SH_Z + 0.55), hand_l=(0.32, -0.20, SH_Z), pole_up=0.6)), (30, OG)], 7),
-    "Otto_Bloqueio": ([(0, OG), (3, og(pelvis_dz=-0.14, spine_pitch=16, pelvis_shift=(0, 0.04, 0),
-                                       hand_l=(0.12, -0.24, SH_Z + 0.16), hand_r=(-0.12, -0.22, SH_Z + 0.18))), (12, OG)], None),
+    # bloqueio: antebraços fechados à frente do peito e do queixo, tronco quase ereto (antes cobria a cabeça e
+    # se encolhia demais)
+    "Otto_Bloqueio": ([(0, OG), (3, og(pelvis_dz=-0.13, spine_pitch=8, pelvis_shift=(0, 0.04, 0), head_pitch=6,
+                                       hand_l=(0.20, -0.40, SH_Z - 0.04), hand_r=(-0.14, -0.36, SH_Z - 0.10))),
+                       (9, og(pelvis_dz=-0.13, spine_pitch=8, pelvis_shift=(0, 0.04, 0), head_pitch=6,
+                              hand_l=(0.20, -0.39, SH_Z - 0.04), hand_r=(-0.14, -0.35, SH_Z - 0.10))), (16, OG)], None),
     "Otto_Hit": ([(0, OG), (3, og(spine_pitch=-12, head_pitch=-22, head_yaw=10, pelvis_shift=(0, 0.06, 0),
                                   hand_l=(0.40, -0.10, SH_Z - 0.25), hand_r=(-0.35, -0.05, SH_Z - 0.25))),
                  (9, og(spine_pitch=0, head_pitch=-8, pelvis_shift=(0, 0.03, 0))), (22, OG)], None),
 }
+def oc(**o):  # agachado: base larga, tronco sobre os joelhos
+    p = og(pelvis_dz=-0.40, spine_pitch=24, hand_l=(0.28, -0.36, SH_Z - 0.40), hand_r=(-0.24, -0.30, SH_Z - 0.44),
+           foot_l=(0.24, -0.24, 0.10), foot_r=(-0.26, 0.24, 0.10))
+    p.update(o)
+    return p
+
+
+def oair(**o):  # no ar: pernas recolhidas, braços abertos para o peso
+    p = og(pelvis_dz=0.0, spine_pitch=14, foot_l=(0.20, -0.12, 0.42), foot_r=(-0.20, 0.12, 0.36), foot_l_pitch=20,
+           foot_r_pitch=30, hand_l=(0.32, -0.30, SH_Z - 0.04), hand_r=(-0.28, -0.26, SH_Z - 0.08))
+    p.update(o)
+    return p
+
+
+OC, OA = oc(), oair()
+RO = 0.62  # alcance do braço do Otto à frente da guarda
+# chutes em pé
+O["Otto_ChuteBaixo"] = ([(0, OG), (3, og(foot_l=(0.20, -0.30, 0.32), foot_l_pitch=30, pelvis_dz=-0.08)),
+                         (5, og(foot_l=(0.18, -0.80, 0.22), foot_l_pitch=60, pelvis_yaw=30, spine_pitch=4, pelvis_dz=-0.07)),
+                         (8, og(foot_l=(0.18, -0.76, 0.22), foot_l_pitch=60, pelvis_yaw=30, spine_pitch=4, pelvis_dz=-0.07)),
+                         (18, OG)], 5)
+# chute frontal de sola (empurrão) com a perna de trás, na altura da barriga
+O["Otto_ChuteMedio"] = ([(0, OG), (4, og(foot_r=(-0.10, -0.10, 0.55), foot_r_pitch=50, pelvis_yaw=20, spine_pitch=-2,
+                                         pelvis_dz=-0.06)),
+                         (8, og(foot_r=(-0.05, -0.92, 0.78), foot_r_pitch=80, foot_r_yaw=10, spine_pitch=-14, pelvis_yaw=30,
+                                pelvis_shift=(0, -0.06, 0), pelvis_dz=-0.05)),
+                         (11, og(foot_r=(-0.05, -0.88, 0.76), foot_r_pitch=80, foot_r_yaw=10, spine_pitch=-14, pelvis_yaw=30,
+                                 pelvis_shift=(0, -0.06, 0), pelvis_dz=-0.05)),
+                         (18, og(foot_r=(-0.10, -0.25, 0.50), foot_r_pitch=40, spine_pitch=0)), (28, OG)], 8)
+# circular pesado na altura das costelas
+O["Otto_ChuteAlto"] = ([(0, OG), (6, og(pelvis_yaw=50, spine_yaw=-30, pelvis_dz=-0.06, foot_r=(-0.10, -0.05, 0.60),
+                                        foot_r_yaw=80, foot_r_pitch=50)),
+                        (13, og(pelvis_yaw=95, spine_yaw=-50, spine_pitch=-24, pelvis_dz=-0.03, foot_r=(0.05, -0.88, 1.12),
+                                foot_r_yaw=95, foot_r_pitch=75, hand_r=(-0.30, 0.10, SH_Z - 0.15), foot_l_yaw=110)),
+                        (17, og(pelvis_yaw=95, spine_yaw=-50, spine_pitch=-24, pelvis_dz=-0.03, foot_r=(0.05, -0.84, 1.08),
+                                foot_r_yaw=95, foot_r_pitch=75, hand_r=(-0.30, 0.10, SH_Z - 0.15), foot_l_yaw=110)),
+                        (26, og(pelvis_yaw=55, spine_yaw=-28, foot_r=(-0.05, -0.15, 0.55), foot_r_yaw=80, foot_r_pitch=45)),
+                        (40, OG)], 13)
+# 6HP: marreta de duas mãos por cima da cabeça
+O["Otto_Marreta"] = ([(0, OG), (10, og(pelvis_dz=-0.04, spine_pitch=-14, head_pitch=-10, hand_l=(0.12, 0.02, SH_Z + 0.50),
+                                       hand_r=(-0.12, 0.02, SH_Z + 0.50), pole_up=0.8)),
+                      (19, og(pelvis_dz=-0.22, spine_pitch=40, pelvis_shift=(0, -0.10, 0), hand_l=(0.10, -0.80, SH_Z - 0.45),
+                              hand_r=(-0.10, -0.80, SH_Z - 0.45), foot_r_pitch=-25)),
+                      (22, og(pelvis_dz=-0.22, spine_pitch=40, pelvis_shift=(0, -0.10, 0), hand_l=(0.10, -0.78, SH_Z - 0.48),
+                              hand_r=(-0.10, -0.78, SH_Z - 0.48))), (38, OG)], 19)
+# agachado
+O["Otto_Agachada"] = ([(0, OC), (40, oc(pelvis_dz=-0.42, spine_pitch=25)), (80, OC)], None)
+O["Otto_AgBloqueio"] = ([(0, OC), (3, oc(pelvis_shift=(0, 0.04, 0), spine_pitch=16, hand_l=(0.20, -0.38, SH_Z - 0.30),
+                                         hand_r=(-0.14, -0.34, SH_Z - 0.34))),
+                         (9, oc(pelvis_shift=(0, 0.04, 0), spine_pitch=16, hand_l=(0.20, -0.37, SH_Z - 0.30),
+                                hand_r=(-0.14, -0.33, SH_Z - 0.34))), (16, OC)], None)
+O["Otto_AgSocoLeve"] = ([(0, OC), (2, oc(hand_l=(0.24, -0.28, SH_Z - 0.38))),
+                         (4, oc(hand_l=(0.12, -0.30 - RO, SH_Z - 0.42), spine_yaw=4, pelvis_yaw=8)),
+                         (6, oc(hand_l=(0.12, -0.28 - RO, SH_Z - 0.42), spine_yaw=2, pelvis_yaw=8)), (15, OC)], 4)
+O["Otto_AgSocoMedio"] = ([(0, OC), (3, oc(spine_yaw=-22, hand_r=(-0.26, -0.18, SH_Z - 0.42))),
+                          (6, oc(spine_yaw=16, pelvis_yaw=0, hand_r=(-0.02, -0.30 - RO, SH_Z - 0.40), foot_r_yaw=40)),
+                          (9, oc(spine_yaw=14, pelvis_yaw=0, hand_r=(-0.02, -0.28 - RO, SH_Z - 0.40), foot_r_yaw=40)),
+                          (23, OC)], 6)
+# 2HP: gancho subindo da base agachada (anti-aéreo)
+O["Otto_AgUpper"] = ([(0, OC), (4, oc(pelvis_dz=-0.46, spine_yaw=-26, hand_r=(-0.12, -0.14, SH_Z - 0.62))),
+                      (8, og(pelvis_dz=-0.04, pelvis_yaw=0, spine_yaw=20, spine_pitch=-8, hand_r=(0.0, -0.42, SH_Z + 0.45),
+                             hand_l=(0.30, -0.22, SH_Z - 0.02), foot_r_pitch=-30, pole_up=0.6)),
+                      (13, og(pelvis_dz=-0.04, pelvis_yaw=0, spine_yaw=20, spine_pitch=-10, hand_r=(0.0, -0.38, SH_Z + 0.50),
+                              hand_l=(0.30, -0.22, SH_Z - 0.02), foot_r_pitch=-30, pole_up=0.6)), (38, OC)], 8)
+O["Otto_AgChuteLeve"] = ([(0, OC), (3, oc(foot_l=(0.22, -0.42, 0.14), foot_l_pitch=30)),
+                          (5, oc(foot_l=(0.20, -0.95, 0.10), foot_l_pitch=75, pelvis_yaw=35)),
+                          (7, oc(foot_l=(0.20, -0.92, 0.10), foot_l_pitch=75, pelvis_yaw=35)), (17, OC)], 5)
+O["Otto_AgChuteMedio"] = ([(0, OC), (4, oc(foot_r=(-0.08, 0.05, 0.25), foot_r_pitch=40, pelvis_yaw=45)),
+                           (7, oc(foot_r=(0.0, -1.0, 0.12), foot_r_yaw=90, foot_r_pitch=80, pelvis_yaw=80, spine_yaw=-28,
+                                  hand_r=(-0.30, 0.08, SH_Z - 0.46), foot_l_yaw=95)),
+                           (10, oc(foot_r=(0.0, -0.96, 0.12), foot_r_yaw=90, foot_r_pitch=80, pelvis_yaw=80, spine_yaw=-28,
+                                   hand_r=(-0.30, 0.08, SH_Z - 0.46), foot_l_yaw=95)), (26, OC)], 7)
+# 2HK: rasteira pesada, gira rente ao chão
+O["Otto_Rasteira"] = ([(0, OC), (5, oc(pelvis_dz=-0.52, pelvis_yaw=70, spine_yaw=-20, spine_pitch=30,
+                                       hand_l=(0.36, -0.30, 0.32), hand_r=(0.05, -0.22, 0.32), foot_r=(-0.32, 0.20, 0.10))),
+                       (10, oc(pelvis_dz=-0.55, pelvis_yaw=150, spine_yaw=-40, spine_pitch=32, hand_l=(0.36, -0.10, 0.28),
+                               hand_r=(0.10, -0.25, 0.28), foot_r=(0.20, -1.05, 0.08), foot_r_yaw=150, foot_r_pitch=80)),
+                       (14, oc(pelvis_dz=-0.55, pelvis_yaw=160, spine_yaw=-40, spine_pitch=32, hand_l=(0.36, -0.10, 0.28),
+                               hand_r=(0.10, -0.25, 0.28), foot_r=(0.35, -0.95, 0.08), foot_r_yaw=160, foot_r_pitch=80)),
+                       (38, OC)], 10)
+# pulo
+O["Otto_PuloInicio"] = ([(0, OG), (4, og(pelvis_dz=-0.24, spine_pitch=20, hand_l=(0.30, -0.25, SH_Z - 0.22))),
+                         (6, og(pelvis_dz=-0.02, spine_pitch=0, foot_l_pitch=-30, foot_r_pitch=-30))], None)
+O["Otto_PuloAr"] = ([(0, OA), (20, oair(foot_l=(0.20, -0.14, 0.46), foot_r=(-0.20, 0.10, 0.40))), (40, OA)], None)
+O["Otto_Aterrissa"] = ([(0, OA), (3, og(pelvis_dz=-0.28, spine_pitch=22)), (12, OG)], None)
+# aéreos
+O["Otto_AereoSoco"] = ([(0, OA), (2, oair(hand_l=(0.26, -0.26, SH_Z - 0.04))),
+                        (4, oair(hand_l=(0.12, -0.30 - RO, SH_Z - 0.26), spine_pitch=22, pelvis_yaw=10)),
+                        (9, oair(hand_l=(0.12, -0.28 - RO, SH_Z - 0.26), spine_pitch=22, pelvis_yaw=10)), (15, OA)], 4)
+# j.MP: martelo de punho para baixo com a mão de trás
+O["Otto_AereoPunho"] = ([(0, OA), (3, oair(spine_pitch=0, spine_yaw=-18, hand_r=(-0.20, -0.10, SH_Z + 0.35), pole_up=0.5)),
+                         (6, oair(spine_pitch=30, spine_yaw=8, hand_r=(-0.02, -0.72, SH_Z - 0.32))),
+                         (10, oair(spine_pitch=30, spine_yaw=8, hand_r=(-0.02, -0.70, SH_Z - 0.36))), (18, OA)], 6)
+# j.HP: marreta de duas mãos no ar
+O["Otto_AereoMarreta"] = ([(0, OA), (5, oair(spine_pitch=-12, hand_l=(0.12, 0.0, SH_Z + 0.45),
+                                             hand_r=(-0.12, 0.0, SH_Z + 0.45), pole_up=0.8)),
+                           (9, oair(spine_pitch=36, hand_l=(0.10, -0.75, SH_Z - 0.38), hand_r=(-0.10, -0.75, SH_Z - 0.38))),
+                           (13, oair(spine_pitch=36, hand_l=(0.10, -0.72, SH_Z - 0.42), hand_r=(-0.10, -0.72, SH_Z - 0.42))),
+                           (23, OA)], 9)
+# j.LK: joelhada
+O["Otto_AereoJoelho"] = ([(0, OA), (2, oair(foot_l=(0.20, -0.20, 0.40), foot_l_pitch=0)),
+                          (4, oair(foot_l=(0.18, -0.38, 0.50), foot_l_pitch=-20, pelvis_yaw=18, spine_pitch=4,
+                                   pelvis_shift=(0, -0.05, 0))),
+                          (10, oair(foot_l=(0.18, -0.36, 0.50), foot_l_pitch=-20, pelvis_yaw=18, spine_pitch=4,
+                                    pelvis_shift=(0, -0.05, 0))), (16, OA)], 4)
+O["Otto_AereoChute"] = ([(0, OA), (3, oair(foot_l=(0.20, -0.22, 0.52), foot_l_pitch=40)),
+                         (6, oair(foot_l=(0.18, -0.86, 0.18), foot_l_pitch=70, pelvis_yaw=40, spine_pitch=-10)),
+                         (10, oair(foot_l=(0.18, -0.82, 0.20), foot_l_pitch=70, pelvis_yaw=40, spine_pitch=-10)),
+                         (18, OA)], 6)
+# j.HK: pisão de dois pés para baixo e à frente
+O["Otto_AereoPisao"] = ([(0, OA), (5, oair(foot_l=(0.18, -0.15, 0.62), foot_r=(-0.18, -0.10, 0.60), foot_l_pitch=10,
+                                           foot_r_pitch=10, spine_pitch=-6, hand_l=(0.40, -0.10, SH_Z + 0.15),
+                                           hand_r=(-0.40, -0.10, SH_Z + 0.15))),
+                         (9, oair(foot_l=(0.16, -0.58, -0.04), foot_r=(-0.16, -0.52, -0.02), foot_l_pitch=40,
+                                  foot_r_pitch=40, spine_pitch=-12, hand_l=(0.42, -0.05, SH_Z + 0.20),
+                                  hand_r=(-0.42, -0.05, SH_Z + 0.20))),
+                         (14, oair(foot_l=(0.16, -0.56, -0.02), foot_r=(-0.16, -0.50, 0.0), foot_l_pitch=40,
+                                   foot_r_pitch=40, spine_pitch=-12, hand_l=(0.42, -0.05, SH_Z + 0.20),
+                                   hand_r=(-0.42, -0.05, SH_Z + 0.20))),
+                         (23, OA)], 9)
+# 236P: investida de ombro (o núcleo carrega o deslocamento)
+O["Otto_Investida"] = ([(0, OG), (5, og(pelvis_dz=-0.18, spine_pitch=30, spine_yaw=-35, hand_l=(0.10, -0.25, SH_Z - 0.25),
+                                        hand_r=(-0.10, -0.15, SH_Z - 0.20), foot_r=(-0.22, 0.40, 0.12), foot_r_pitch=-30)),
+                        (9, og(pelvis_dz=-0.16, spine_pitch=28, spine_yaw=-38, hand_l=(0.10, -0.25, SH_Z - 0.25),
+                               hand_r=(-0.10, -0.15, SH_Z - 0.20), foot_l=(0.20, -0.45, 0.20), foot_r=(-0.20, 0.30, 0.10))),
+                        (13, og(pelvis_dz=-0.14, spine_pitch=22, spine_yaw=-45, pelvis_shift=(0, -0.10, 0),
+                                hand_l=(0.30, -0.55, SH_Z - 0.10), hand_r=(-0.10, -0.15, SH_Z - 0.20), pole_up=0.3,
+                                foot_l=(0.20, -0.35, 0.10), foot_r=(-0.22, 0.32, 0.10), foot_r_pitch=-25)),
+                        (17, og(pelvis_dz=-0.14, spine_pitch=22, spine_yaw=-45, pelvis_shift=(0, -0.10, 0),
+                                hand_l=(0.30, -0.53, SH_Z - 0.10), hand_r=(-0.10, -0.15, SH_Z - 0.20), pole_up=0.3,
+                                foot_l=(0.20, -0.35, 0.10), foot_r=(-0.22, 0.32, 0.10))), (36, OG)], 13)
+# 236PP: investida reforçada, fecha com as duas palmas à frente
+O["Otto_InvestidaEX"] = ([(0, OG), (4, og(pelvis_dz=-0.20, spine_pitch=32, spine_yaw=-20, hand_l=(0.20, -0.20, SH_Z - 0.22),
+                                          hand_r=(-0.20, -0.15, SH_Z - 0.22), foot_r=(-0.22, 0.42, 0.12),
+                                          foot_r_pitch=-30)),
+                          (8, og(pelvis_dz=-0.18, spine_pitch=28, spine_yaw=-15, hand_l=(0.20, -0.22, SH_Z - 0.22),
+                                 hand_r=(-0.20, -0.18, SH_Z - 0.22), foot_l=(0.20, -0.45, 0.20), foot_r=(-0.20, 0.30, 0.10))),
+                          (11, og(pelvis_dz=-0.14, spine_pitch=18, spine_yaw=0, pelvis_shift=(0, -0.12, 0),
+                                  hand_l=(0.16, -0.85, SH_Z - 0.02), hand_r=(-0.16, -0.85, SH_Z - 0.02),
+                                  foot_l=(0.20, -0.38, 0.10), foot_r=(-0.22, 0.34, 0.10), foot_r_pitch=-25)),
+                          (15, og(pelvis_dz=-0.14, spine_pitch=18, spine_yaw=0, pelvis_shift=(0, -0.12, 0),
+                                  hand_l=(0.16, -0.83, SH_Z - 0.02), hand_r=(-0.16, -0.83, SH_Z - 0.02),
+                                  foot_l=(0.20, -0.38, 0.10), foot_r=(-0.22, 0.34, 0.10))), (32, OG)], 11)
+# 214K: pisão que treme o chão (joelho alto, desce com o corpo todo)
+O["Otto_Pisao"] = ([(0, OG), (8, og(foot_l=(0.20, -0.25, 0.70), foot_l_pitch=10, spine_pitch=-6, pelvis_dz=-0.04,
+                                    hand_l=(0.40, -0.20, SH_Z + 0.05), hand_r=(-0.40, -0.10, SH_Z + 0.05))),
+                    (12, og(foot_l=(0.20, -0.25, 0.76), foot_l_pitch=10, spine_pitch=-8, pelvis_dz=-0.03,
+                            hand_l=(0.42, -0.20, SH_Z + 0.10), hand_r=(-0.42, -0.10, SH_Z + 0.10))),
+                    (15, og(foot_l=(0.22, -0.45, 0.10), foot_l_pitch=0, spine_pitch=30, pelvis_dz=-0.26,
+                            hand_l=(0.36, -0.40, SH_Z - 0.35), hand_r=(-0.32, -0.30, SH_Z - 0.35))),
+                    (19, og(foot_l=(0.22, -0.45, 0.10), foot_l_pitch=0, spine_pitch=30, pelvis_dz=-0.27,
+                            hand_l=(0.36, -0.40, SH_Z - 0.37), hand_r=(-0.32, -0.30, SH_Z - 0.37))), (39, OG)], 15)
+# super 236236P: corre de braços abertos, fecha num laço de braço e termina flexionando
+O["Otto_Super"] = ([(0, OG), (3, og(pelvis_dz=-0.16, spine_pitch=28, hand_l=(0.60, -0.40, SH_Z), hand_r=(-0.60, -0.36, SH_Z),
+                                    foot_r=(-0.22, 0.40, 0.14), foot_r_pitch=-30)),
+                    (7, og(pelvis_dz=-0.12, spine_pitch=18, spine_yaw=30, pelvis_yaw=-10, pelvis_shift=(0, -0.12, 0),
+                           hand_l=(0.15, -0.85, SH_Z + 0.05), hand_r=(-0.55, -0.30, SH_Z), foot_l=(0.20, -0.40, 0.10))),
+                    (11, og(pelvis_dz=-0.12, spine_pitch=18, spine_yaw=34, pelvis_yaw=-10, pelvis_shift=(0, -0.12, 0),
+                            hand_l=(0.05, -0.85, SH_Z + 0.05), hand_r=(-0.55, -0.30, SH_Z), foot_l=(0.20, -0.40, 0.10))),
+                    (22, og(spine_pitch=14, spine_yaw=60, pelvis_yaw=-20, hand_l=(-0.30, -0.60, SH_Z),
+                            hand_r=(-0.50, -0.10, SH_Z - 0.10))),
+                    (36, og(pelvis_dz=-0.14, spine_pitch=-6, head_pitch=-10, hand_l=(0.45, -0.20, SH_Z + 0.30),
+                            hand_r=(-0.45, -0.20, SH_Z + 0.30), pole_up=-0.4)),
+                    (46, og(pelvis_dz=-0.14, spine_pitch=-6, head_pitch=-10, hand_l=(0.45, -0.20, SH_Z + 0.32),
+                            hand_r=(-0.45, -0.20, SH_Z + 0.32), pole_up=-0.4)), (56, OG)], 7)
+# dash: passada pesada à frente; recuo: salto curto para trás
+O["Otto_Dash"] = ([(0, OG), (4, og(pelvis_dz=-0.14, spine_pitch=24, pelvis_shift=(0, -0.08, 0), foot_r=(-0.22, 0.38, 0.16),
+                                   foot_r_pitch=-30)),
+                   (10, og(pelvis_dz=-0.12, spine_pitch=20, pelvis_shift=(0, -0.05, 0), foot_l=(0.20, -0.40, 0.12))),
+                   (20, OG)], None)
+O["Otto_Recuo"] = ([(0, OG), (4, og(pelvis_dz=-0.05, spine_pitch=-8, pelvis_shift=(0, 0.10, 0), foot_l=(0.20, -0.28, 0.24))),
+                    (12, og(pelvis_dz=-0.16, spine_pitch=8, pelvis_shift=(0, 0.06, 0))), (24, OG)], None)
 oq, olie = fall(og)
 O["Otto_Queda"] = (oq, None)
 O["Otto_Levanta"] = (wake(og, olie), None)

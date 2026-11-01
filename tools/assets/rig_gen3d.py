@@ -54,6 +54,10 @@ bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 for o in gen_objs:
     if o is not gen:
         bpy.data.objects.remove(o, do_unlink=True)
+# normais personalizadas do gerador não acompanham a ida A -> T (ficavam viradas e o jogo sombreava a face de
+# preto): saem, e a malha é exportada com sombreamento suave (sem frestas no contorno de casco invertido)
+if gen.data.has_custom_normals:
+    bpy.ops.mesh.customdata_custom_splitnormals_clear()
 
 # 1. escala e apoio
 vs = np.array([v.co[:] for v in gen.data.vertices])
@@ -63,6 +67,12 @@ cx, cy = (vs[:, 0].max() + vs[:, 0].min()) / 2, np.median(vs[:, 1])
 for v in gen.data.vertices:
     v.co = Vector(((v.co.x - cx) * s, (v.co.y - cy) * s + B["pelvis"].y * 0.3, (v.co.z - zmin) * s))
 gen.data.update()
+# solda as costuras de UV antes de reduzir: a malha precisa ser contínua para a vizinhança (rótulos, suavização)
+bm = bmesh.new()
+bm.from_mesh(gen.data)
+bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0004)
+bm.to_mesh(gen.data)
+bm.free()
 
 # redução
 gen.data.calc_loop_triangles()
@@ -128,6 +138,46 @@ bpy.context.view_layer.objects.active = gen
 bpy.ops.object.datalayer_transfer(data_type="VGROUP_WEIGHTS") if False else None
 bpy.ops.object.modifier_apply(modifier="dt")
 
+# 4a. pesos por calor (bone heat) na própria malha gerada, com o esqueleto em repouso = pose A. A transferência
+# acima pega a superfície mais próxima do corpo base, que é mais fino: o braço dele atravessa o flanco do Otto
+# e o flanco ganhava peso de braço (tiras penduradas, furos nas axilas). O calor anda pela superfície da malha.
+# Vértices sem solução de calor ficam com a transferência.
+if os.environ.get("FG_WEIGHTS", "heat") == "heat":
+    dtw = {v.index: [(gen.vertex_groups[g.group].name, g.weight) for g in v.groups] for v in gen.data.vertices}
+    fitA = arm.copy()
+    fitA.data = arm.data.copy()
+    scene.collection.objects.link(fitA)
+    bpy.ops.object.select_all(action="DESELECT")
+    fitA.select_set(True)
+    bpy.context.view_layer.objects.active = fitA
+    bpy.ops.object.mode_set(mode="POSE")
+    bpy.ops.pose.armature_apply(selected=False)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    for g in list(gen.vertex_groups):
+        gen.vertex_groups.remove(g)
+    bpy.ops.object.select_all(action="DESELECT")
+    gen.select_set(True)
+    fitA.select_set(True)
+    bpy.context.view_layer.objects.active = fitA
+    bpy.ops.object.parent_set(type="ARMATURE_AUTO")
+    mw = gen.matrix_world.copy()
+    gen.parent = None
+    gen.matrix_world = mw
+    for md in list(gen.modifiers):
+        gen.modifiers.remove(md)
+    bpy.data.objects.remove(fitA, do_unlink=True)
+    for g in body.vertex_groups:
+        if g.name not in gen.vertex_groups:
+            gen.vertex_groups.new(name=g.name)
+    fb = 0
+    for v in gen.data.vertices:
+        if sum(g.weight for g in v.groups) > 0.01:
+            continue
+        for n, w in dtw[v.index]:
+            gen.vertex_groups[n].add([v.index], w, "REPLACE")
+        fb += 1
+    print("HEAT_FALLBACK_VERTS", fb)
+
 # objetos soltos longe do corpo (ex.: capacete pendurado no quadril) seguem o quadril
 bvh_src = bodyA
 from mathutils.bvhtree import BVHTree  # noqa: E402
@@ -165,23 +215,116 @@ for v in gen.data.vertices:
         moved += 1
 print("LOOSE_TO_PELVIS", moved)
 
-# Otto: a frente do avental (rígida, de couro) segue o quadril; as coxas só puxam um pouco
+# Otto: o avental (couro rígido) segue o quadril: o painel da frente inteiro (a coxa passa por trás dele num
+# chute, sem esticar o couro), as laterais e a barra de trás com mais coxa (inclui as ferramentas penduradas).
+# A calça larga fica longe da pele do corpo base mas perto do eixo da perna: é perna, não avental.
+def leg_axis_dist(p):
+    """Distância ao eixo da perna mais próxima (coxa e canela). A calça larga do Otto fica longe da pele do
+    corpo base, mas perto do eixo: é perna, não avental."""
+    best = 9.0
+    for s_ in ("l", "r"):
+        for a_, b_ in ((B["thigh_" + s_], B["calf_" + s_]), (B["calf_" + s_], B["foot_" + s_])):
+            ab = b_ - a_
+            t_ = max(0.0, min(1.0, (p - a_).dot(ab) / ab.length_squared))
+            best = min(best, (p - (a_ + ab * t_)).length)
+    return best
+
+
 if NAME == "otto":
     pinned = 0
     for v in gen.data.vertices:
-        if not (B["calf_l"].z - 0.10 < v.co.z < B["thigh_l"].z + 0.05 and abs(v.co.x) < 0.30
-                and v.co.y < B["pelvis"].y - 0.06):
+        if not (B["calf_l"].z - 0.10 < v.co.z < B["thigh_l"].z + 0.05 and abs(v.co.x) < 0.50):
             continue
         loc, nrm, idx, dist = tree.find_nearest(v.co)
-        if dist is None or dist < 0.02:
+        front = v.co.y < B["pelvis"].y - 0.14  # painel da frente: rígido, a coxa passa por trás dele
+        if dist is None or dist < 0.02 or (not front and leg_axis_dist(v.co) < 0.17):
+            continue
+        if sum(g.weight for g in v.groups if gen.vertex_groups[g.group].name.startswith(ARMISH)) > 0.5:
             continue
         side = "thigh_l" if v.co.x > 0 else "thigh_r"
         for g in list(v.groups):
             gen.vertex_groups[g.group].remove([v.index])
-        pel.add([v.index], 0.8, "REPLACE")
-        gen.vertex_groups[side].add([v.index], 0.2, "REPLACE")
+        pel.add([v.index], 1.0 if front else 0.6, "REPLACE")
+        if not front:
+            gen.vertex_groups[side].add([v.index], 0.4, "REPLACE")
         pinned += 1
     print("APRON_PINNED", pinned)
+
+# 4b. limpeza dos pesos (malha contínua, pose A)
+gnames = [g.name for g in gen.vertex_groups]
+NV, NG = len(gen.data.vertices), len(gnames)
+W = np.zeros((NV, NG), dtype=np.float32)
+for v in gen.data.vertices:
+    for g in v.groups:
+        W[v.index, g.group] = g.weight
+is_arm = np.array([n.startswith(ARMISH) for n in gnames])
+ev = np.array([e.vertices[:] for e in gen.data.edges])
+nbr = [[] for _ in range(NV)]
+for a_, b_ in ev:
+    nbr[a_].append(b_)
+    nbr[b_].append(a_)
+
+# a) o ombro do esqueleto (corpo base) fica dentro do deltoide largo do personagem gerado: o calor dava peso de
+# braço a meio peito e às costas. Para dentro do ombro, o peso de braço some aos poucos e vai para o tronco.
+co = np.array([v.co[:] for v in gen.data.vertices])
+shx = B["upperarm_l"].x
+ramp = np.clip((np.abs(co[:, 0]) - (shx - 0.10)) / 0.12, 0, 1)
+ramp[co[:, 2] < hip_z] = 1.0  # abaixo do quadril só as mãos chegam perto: não mexe
+cut = W[:, is_arm] * (1 - ramp[:, None])
+W[:, is_arm] -= cut
+W[:, gnames.index("spine_03")] += cut.sum(axis=1)
+print("ARM_TO_TORSO", int((cut.sum(axis=1) > 0.05).sum()))
+
+# b) rótulo grosso (braço E/D, tronco, quadril, perna E/D): ilhas pequenas de um rótulo cercadas por outro
+# (tiras soltas) passam para o rótulo da vizinhança, com a média dos pesos dos vizinhos
+def coarse(n):
+    if n.startswith(ARMISH):
+        return 1 if n.endswith("_l") else 2
+    if n.startswith(("thigh", "calf", "foot", "ball")):
+        return 3 if n.endswith("_l") else 4
+    return 0
+
+
+cg = np.array([coarse(n) for n in gnames])
+lab = cg[W.argmax(axis=1)]
+for it in range(6):
+    changed = 0
+    for i in range(NV):
+        nb = nbr[i]
+        if not nb:
+            continue
+        ln = lab[nb]
+        vals, cnt = np.unique(ln, return_counts=True)
+        k = cnt.argmax()
+        if vals[k] != lab[i] and cnt[k] >= 0.7 * len(nb):
+            sel = [j for j in nb if lab[j] == vals[k]]
+            W[i] = W[sel].mean(axis=0)
+            lab[i] = vals[k]
+            changed += 1
+    if not changed:
+        break
+print("LABEL_FIX", it, changed)
+
+# c) suavização laplaciana dos pesos (some com as pontas isoladas)
+deg = np.array([max(len(n), 1) for n in nbr], dtype=np.float32)
+src = np.repeat(np.arange(NV), [len(n) for n in nbr])
+dst = np.concatenate([np.array(n, dtype=np.int64) for n in nbr if n]) if NV else np.zeros(0, np.int64)
+for it in range(4):
+    acc = np.zeros_like(W)
+    np.add.at(acc, src, W[dst])
+    W = 0.5 * W + 0.5 * acc / deg[:, None]
+W[W < 0.01] = 0
+W /= np.maximum(W.sum(axis=1, keepdims=True), 1e-6)
+gen_lab = cg[W.argmax(axis=1)]
+for g in list(gen.vertex_groups):
+    gen.vertex_groups.remove(g)
+for n in gnames:
+    gen.vertex_groups.new(name=n)
+for j in range(NG):
+    idx = np.nonzero(W[:, j] > 0)[0]
+    vg = gen.vertex_groups[j]
+    for i in idx:
+        vg.add([int(i)], float(W[i, j]), "REPLACE")
 
 # 5. pose A -> T-pose de repouso: armadura auxiliar com repouso = pose A, posada de volta em T
 fit = arm.copy()
@@ -206,11 +349,22 @@ bpy.data.objects.remove(bodyA, do_unlink=True)
 # capacete): corta essa película
 bm = bmesh.new()
 bm.from_mesh(gen.data)
+bm.verts.ensure_lookup_table()
+lay = bm.verts.layers.int.new("lab")
+for v in bm.verts:
+    v[lay] = int(gen_lab[v.index])
 bm.edges.ensure_lookup_table()
 stretched = {e.index for e in bm.edges
              if e.calc_length() > 2.5 * max(edge_len0[e.index], 1e-4) and e.calc_length() - edge_len0[e.index] > 0.04}
 long_faces = [f for f in bm.faces if any(e.index in stretched for e in f.edges)]
 bmesh.ops.delete(bm, geom=long_faces, context="FACES")
+# película que sobrou presa ao braço (na pose A a mão encostava no quadril): na T-pose o braço é horizontal,
+# então o que pende bem abaixo dele é resto de pele esticada
+arm_z = B["upperarm_l"].z
+hang_dz = 0.10 if NAME == "nadja" else 0.16  # raio do antebraço (luvas grossas do Otto)
+hang = [v for v in bm.verts if v[lay] in (1, 2) and abs(v.co.x) > B["upperarm_l"].x + 0.15 and v.co.z < arm_z - hang_dz]
+bmesh.ops.delete(bm, geom=hang, context="VERTS")
+print("HANGING_REMOVED", len(hang))
 # solda vértices coincidentes (a malha vem partida nas costuras de UV) e tira fragmentos soltos
 bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0004)
 bm.verts.ensure_lookup_table()
@@ -232,6 +386,27 @@ for v in bm.verts:
         small.extend(comp)
 bmesh.ops.delete(bm, geom=small, context="VERTS")
 print("SMALL_PIECES_REMOVED_VERTS", len(small))
+# fecha os furos que o corte deixou (axilas). Tampa que juntaria partes diferentes (braço e tronco, as duas
+# pernas) refaria a película: fica de fora. UV da tampa = UV que o vértice já tem em outra face.
+bm.edges.ensure_lookup_table()
+filled = bmesh.ops.holes_fill(bm, edges=[e for e in bm.edges if e.is_boundary], sides=160)["faces"]
+mixed = []
+for f in filled:
+    labs = [v[lay] for v in f.verts]
+    if len(labs) > 8 and max(labs.count(x) for x in set(labs)) < 0.85 * len(labs):  # furinho: fecha sempre
+        mixed.append(f)
+bmesh.ops.delete(bm, geom=mixed, context="FACES_ONLY")
+filled = [f for f in filled if f.is_valid]
+uvl_bm = bm.loops.layers.uv.active
+fset = set(filled)
+for f in filled:
+    for lp in f.loops:
+        other = next((x for x in lp.vert.link_loops if x.face not in fset), None)
+        if other is not None and uvl_bm is not None:
+            lp[uvl_bm].uv = other[uvl_bm].uv
+if filled:
+    bmesh.ops.triangulate(bm, faces=filled, quad_method="BEAUTY", ngon_method="BEAUTY")
+print("HOLES_FILLED", len(filled), "SKIPPED_MIXED", len(mixed))
 bm.to_mesh(gen.data)
 bm.free()
 print("CUT_STRETCHED", len(long_faces))
@@ -253,6 +428,8 @@ for o in list(bpy.data.objects):
     if o.type == "MESH" and o is not gen:
         bpy.data.objects.remove(o, do_unlink=True)  # ex.: Icosphere auxiliar do pacote
 
+for poly in gen.data.polygons:
+    poly.use_smooth = True
 # limita a 4 influências por vértice (raylib) e normaliza
 bpy.context.view_layer.objects.active = gen
 bpy.ops.object.vertex_group_limit_total(group_select_mode="ALL", limit=4)
