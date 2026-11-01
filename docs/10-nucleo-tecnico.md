@@ -307,7 +307,7 @@ Um roteiro descreve os inputs de cada jogador por blocos de frames:
 
 ```text
 # <frames> <input P1> <input P2>   (notação numérica; 5 = neutro)
-place 12000     # distância inicial entre os lutadores
+place 13000     # distância inicial entre os lutadores
 1 5 1HK         # Otto aperta HK agachado (2HK) e erra
 14 5 5
 1 2MK 5         # Nadja pune com 2MK

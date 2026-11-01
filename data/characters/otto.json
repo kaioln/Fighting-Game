@@ -10,8 +10,8 @@
   "run_speed": 0,
   "jump": { "prejump": 5, "vy": 1220, "gravity": 64, "vx_forward": 420, "vx_back": 360, "landing": 5 },
   "hop":  { "prejump": 5, "vy": 860,  "gravity": 70, "vx_forward": 460, "vx_back": 380, "landing": 4 },
-  "push": { "stand": [-2400, 0, 4800, 17000], "crouch": [-2600, 0, 5200, 11500], "air": [-2300, 3200, 4600, 11000] },
-  "hurt": { "stand": [-3000, 0, 6000, 19000], "crouch": [-3200, 0, 6400, 12000], "air": [-2800, 1500, 5600, 15500] },
+  "push": { "stand": [-2900, 0, 5800, 17000], "crouch": [-3100, 0, 6200, 11500], "air": [-2800, 3200, 5600, 11000] },
+  "hurt": { "stand": [-3500, 0, 7000, 19000], "crouch": [-3700, 0, 7400, 12000], "air": [-3300, 1500, 6600, 15500] },
 
   "required": {
     "dash": "dash", "backdash": "backdash", "throw": "throw_f", "back_throw": "throw_b",
@@ -29,7 +29,7 @@
       "animation": "otto/5LP_jab_de_luva", "sfx": "impact_light_heavyglove", "vfx": "spark_light",
       "hits": [ { "frames": [5, 6], "damage": 350, "hitstun": 13, "blockstun": 10, "hitstop": 9,
                   "pushback_hit": 1800, "pushback_block": 2400 } ],
-      "boxes": [ { "frames": [5, 6], "kind": "hit", "box": [1900, 10000, 4300, 2200] } ],
+      "boxes": [ { "frames": [5, 6], "kind": "hit", "box": [2400, 10000, 4300, 2200] } ],
       "cancels": [ { "frames": [5, 10], "into": ["chain", "special", "super"] } ],
       "chain": ["5LP", "2LP"],
       "starter_scaling_permil": 100, "meter_gain_hit": 20, "meter_gain_block": 10 },
@@ -39,9 +39,9 @@
       "hits": [ { "frames": [8, 10], "damage": 750, "hitstun": 18, "blockstun": 13, "hitstop": 11,
                   "pushback_hit": 2600, "pushback_block": 3200 } ],
       "boxes": [
-        { "frames": [8, 10], "kind": "hit", "box": [2200, 11000, 5800, 2600] },
-        { "frames": [1, 24], "kind": "hurt", "box": [-3000, 0, 6000, 19000] },
-        { "frames": [8, 17], "kind": "hurt", "box": [2000, 10800, 5200, 3000] }
+        { "frames": [8, 10], "kind": "hit", "box": [2700, 11000, 5800, 2600] },
+        { "frames": [1, 24], "kind": "hurt", "box": [-3500, 0, 7000, 19000] },
+        { "frames": [8, 17], "kind": "hurt", "box": [2500, 10800, 5200, 3000] }
       ],
       "cancels": [ { "frames": [8, 15], "into": ["special", "super"] } ],
       "meter_gain_hit": 40, "meter_gain_block": 20 },
@@ -51,7 +51,7 @@
       "animation": "otto/5HP_cabecada_blindada", "sfx": "impact_heavy_head", "vfx": "spark_heavy",
       "hits": [ { "frames": [13, 16], "damage": 1200, "hitstun": 24, "blockstun": 18, "hitstop": 14,
                   "pushback_hit": 3200, "pushback_block": 4600 } ],
-      "boxes": [ { "frames": [13, 16], "kind": "hit", "box": [1500, 12000, 4500, 4500] } ],
+      "boxes": [ { "frames": [13, 16], "kind": "hit", "box": [2000, 12000, 4500, 4500] } ],
       "armor": [ { "frames": [5, 12], "hits": 1 } ],
       "velocity": [ { "frames": [6, 12], "vx": 250 } ],
       "cancels": [ { "frames": [13, 18], "into": ["special", "super"] } ],
@@ -61,7 +61,7 @@
       "animation": "otto/5LK_bota_de_aco", "sfx": "impact_light", "vfx": "spark_light",
       "hits": [ { "frames": [6, 8], "damage": 350, "hitstun": 13, "blockstun": 9, "hitstop": 9,
                   "pushback_hit": 1800, "pushback_block": 2400 } ],
-      "boxes": [ { "frames": [6, 8], "kind": "hit", "box": [1900, 4500, 4500, 2400] } ],
+      "boxes": [ { "frames": [6, 8], "kind": "hit", "box": [2400, 4500, 4500, 2400] } ],
       "cancels": [ { "frames": [6, 11], "into": ["special", "super"] } ],
       "starter_scaling_permil": 100, "meter_gain_hit": 20, "meter_gain_block": 10 },
 
@@ -70,9 +70,9 @@
       "hits": [ { "frames": [9, 11], "damage": 750, "hitstun": 18, "blockstun": 13, "hitstop": 11,
                   "pushback_hit": 2800, "pushback_block": 3400 } ],
       "boxes": [
-        { "frames": [9, 11], "kind": "hit", "box": [2400, 4000, 6800, 2600] },
-        { "frames": [1, 27], "kind": "hurt", "box": [-3000, 0, 6000, 19000] },
-        { "frames": [9, 21], "kind": "hurt", "box": [2200, 3800, 6200, 3000] }
+        { "frames": [9, 11], "kind": "hit", "box": [2900, 4000, 6800, 2600] },
+        { "frames": [1, 27], "kind": "hurt", "box": [-3500, 0, 7000, 19000] },
+        { "frames": [9, 21], "kind": "hurt", "box": [2700, 3800, 6200, 3000] }
       ],
       "meter_gain_hit": 40, "meter_gain_block": 20 },
 
@@ -80,14 +80,14 @@
       "animation": "otto/5HK_pisao_de_bigorna", "sfx": "impact_heavy_stomp", "vfx": "spark_heavy",
       "hits": [ { "frames": [14, 17], "damage": 1200, "hitstun": 24, "blockstun": 16, "hitstop": 15,
                   "pushback_hit": 3000, "pushback_block": 4400, "knockdown": true } ],
-      "boxes": [ { "frames": [14, 17], "kind": "hit", "box": [1800, 3000, 5200, 5000] } ],
+      "boxes": [ { "frames": [14, 17], "kind": "hit", "box": [2300, 3000, 5200, 5000] } ],
       "meter_gain_hit": 60, "meter_gain_block": 30 },
 
     { "id": "2LP", "kind": "normal", "startup": 5, "active": 2, "recovery": 8, "crouching": true,
       "animation": "otto/2LP_soco_baixo", "sfx": "impact_light_heavyglove", "vfx": "spark_light",
       "hits": [ { "frames": [5, 6], "damage": 320, "hitstun": 12, "blockstun": 9, "hitstop": 9,
                   "pushback_hit": 1800, "pushback_block": 2400 } ],
-      "boxes": [ { "frames": [5, 6], "kind": "hit", "box": [1900, 6500, 3900, 2000] } ],
+      "boxes": [ { "frames": [5, 6], "kind": "hit", "box": [2400, 6500, 3900, 2000] } ],
       "cancels": [ { "frames": [5, 10], "into": ["chain", "special", "super"] } ],
       "chain": ["5LP", "2LP"],
       "starter_scaling_permil": 100, "meter_gain_hit": 20, "meter_gain_block": 10 },
@@ -96,7 +96,7 @@
       "animation": "otto/2MP_martelada_baixa", "sfx": "impact_medium_heavyglove", "vfx": "spark_medium",
       "hits": [ { "frames": [7, 9], "damage": 650, "hitstun": 16, "blockstun": 12, "hitstop": 11,
                   "pushback_hit": 2400, "pushback_block": 3000 } ],
-      "boxes": [ { "frames": [7, 9], "kind": "hit", "box": [1900, 6000, 4600, 2600] } ],
+      "boxes": [ { "frames": [7, 9], "kind": "hit", "box": [2400, 6000, 4600, 2600] } ],
       "cancels": [ { "frames": [7, 14], "into": ["special", "super"] } ],
       "meter_gain_hit": 40, "meter_gain_block": 20 },
 
@@ -105,7 +105,7 @@
       "animation": "otto/2HP_cabecada_ascendente", "sfx": "impact_heavy_head", "vfx": "spark_heavy",
       "hits": [ { "frames": [9, 13], "damage": 1100, "hitstun": 20, "blockstun": 14, "hitstop": 14,
                   "pushback_hit": 3000, "pushback_block": 4000, "juggle_cost": 2 } ],
-      "boxes": [ { "frames": [9, 13], "kind": "hit", "box": [600, 11000, 3800, 10000] } ],
+      "boxes": [ { "frames": [9, 13], "kind": "hit", "box": [1100, 11000, 3800, 10000] } ],
       "cancels": [ { "frames": [9, 15], "into": ["super"] } ],
       "meter_gain_hit": 60, "meter_gain_block": 30 },
 
@@ -113,7 +113,7 @@
       "animation": "otto/2LK_canelada", "sfx": "impact_light", "vfx": "spark_light",
       "hits": [ { "frames": [6, 7], "damage": 300, "hitstun": 12, "blockstun": 8, "hitstop": 9,
                   "pushback_hit": 1800, "pushback_block": 2400, "level": "low" } ],
-      "boxes": [ { "frames": [6, 7], "kind": "hit", "box": [1900, 0, 4200, 2200] } ],
+      "boxes": [ { "frames": [6, 7], "kind": "hit", "box": [2400, 0, 4200, 2200] } ],
       "cancels": [ { "frames": [6, 10], "into": ["chain", "special", "super"] } ],
       "chain": ["2LP", "5LP"],
       "starter_scaling_permil": 100, "meter_gain_hit": 20, "meter_gain_block": 10 },
@@ -122,7 +122,7 @@
       "animation": "otto/2MK_varredura_curta", "sfx": "impact_medium", "vfx": "spark_medium",
       "hits": [ { "frames": [8, 10], "damage": 650, "hitstun": 16, "blockstun": 12, "hitstop": 11,
                   "pushback_hit": 2400, "pushback_block": 3000, "level": "low" } ],
-      "boxes": [ { "frames": [8, 10], "kind": "hit", "box": [2000, 0, 5800, 2400] } ],
+      "boxes": [ { "frames": [8, 10], "kind": "hit", "box": [2500, 0, 5800, 2400] } ],
       "cancels": [ { "frames": [8, 13], "into": ["special", "super"] } ],
       "meter_gain_hit": 40, "meter_gain_block": 20 },
 
@@ -131,9 +131,9 @@
       "hits": [ { "frames": [11, 13], "damage": 1100, "hitstun": 20, "blockstun": 12, "hitstop": 13,
                   "pushback_hit": 2000, "pushback_block": 3800, "level": "low", "knockdown": true } ],
       "boxes": [
-        { "frames": [11, 13], "kind": "hit", "box": [1800, 0, 6600, 2000] },
-        { "frames": [1, 37], "kind": "hurt", "box": [-3200, 0, 6400, 12000] },
-        { "frames": [11, 26], "kind": "hurt", "box": [1800, 0, 6000, 2400] }
+        { "frames": [11, 13], "kind": "hit", "box": [2300, 0, 6600, 2000] },
+        { "frames": [1, 37], "kind": "hurt", "box": [-3700, 0, 7400, 12000] },
+        { "frames": [11, 26], "kind": "hurt", "box": [2300, 0, 6000, 2400] }
       ],
       "meter_gain_hit": 60, "meter_gain_block": 30 },
 
@@ -142,7 +142,7 @@
       "animation": "otto/jLP", "sfx": "impact_light", "vfx": "spark_light",
       "hits": [ { "frames": [5, 9], "damage": 400, "hitstun": 12, "blockstun": 9, "hitstop": 9,
                   "pushback_hit": 1600, "pushback_block": 2000, "level": "overhead" } ],
-      "boxes": [ { "frames": [5, 9], "kind": "hit", "box": [1000, 8000, 3200, 2600] } ],
+      "boxes": [ { "frames": [5, 9], "kind": "hit", "box": [1500, 8000, 3200, 2600] } ],
       "starter_scaling_permil": 100, "meter_gain_hit": 20, "meter_gain_block": 10 },
 
     { "id": "j.MP", "kind": "normal", "startup": 7, "active": 4, "recovery": 7, "airborne": true,
@@ -150,7 +150,7 @@
       "animation": "otto/jMP", "sfx": "impact_medium", "vfx": "spark_medium",
       "hits": [ { "frames": [7, 10], "damage": 750, "hitstun": 16, "blockstun": 11, "hitstop": 11,
                   "pushback_hit": 2000, "pushback_block": 2400, "level": "overhead" } ],
-      "boxes": [ { "frames": [7, 10], "kind": "hit", "box": [1000, 6000, 3600, 3200] } ],
+      "boxes": [ { "frames": [7, 10], "kind": "hit", "box": [1500, 6000, 3600, 3200] } ],
       "meter_gain_hit": 40, "meter_gain_block": 20 },
 
     { "id": "j.HP", "kind": "normal", "startup": 10, "active": 4, "recovery": 9, "airborne": true,
@@ -159,7 +159,7 @@
       "animation": "otto/jHP_queda_de_casco", "sfx": "impact_heavy_body", "vfx": "spark_heavy",
       "hits": [ { "frames": [10, 13], "damage": 1100, "hitstun": 19, "blockstun": 14, "hitstop": 14,
                   "pushback_hit": 2400, "pushback_block": 2800, "level": "overhead" } ],
-      "boxes": [ { "frames": [10, 13], "kind": "hit", "box": [-500, 1500, 5000, 5000] } ],
+      "boxes": [ { "frames": [10, 13], "kind": "hit", "box": [-1000, 1500, 6000, 5000] } ],
       "meter_gain_hit": 60, "meter_gain_block": 30 },
 
     { "id": "j.LK", "kind": "normal", "startup": 5, "active": 6, "recovery": 5, "airborne": true,
@@ -167,7 +167,7 @@
       "animation": "otto/jLK", "sfx": "impact_light", "vfx": "spark_light",
       "hits": [ { "frames": [5, 10], "damage": 380, "hitstun": 12, "blockstun": 9, "hitstop": 9,
                   "pushback_hit": 1600, "pushback_block": 2000, "level": "overhead" } ],
-      "boxes": [ { "frames": [5, 10], "kind": "hit", "box": [800, 4500, 3600, 2600] } ],
+      "boxes": [ { "frames": [5, 10], "kind": "hit", "box": [1300, 4500, 3600, 2600] } ],
       "starter_scaling_permil": 100, "meter_gain_hit": 20, "meter_gain_block": 10 },
 
     { "id": "j.MK", "kind": "normal", "startup": 7, "active": 4, "recovery": 7, "airborne": true,
@@ -175,7 +175,7 @@
       "animation": "otto/jMK", "sfx": "impact_medium", "vfx": "spark_medium",
       "hits": [ { "frames": [7, 10], "damage": 700, "hitstun": 16, "blockstun": 11, "hitstop": 11,
                   "pushback_hit": 2000, "pushback_block": 2400, "level": "overhead" } ],
-      "boxes": [ { "frames": [7, 10], "kind": "hit", "box": [900, 3500, 4400, 2800] } ],
+      "boxes": [ { "frames": [7, 10], "kind": "hit", "box": [1400, 3500, 4400, 2800] } ],
       "meter_gain_hit": 40, "meter_gain_block": 20 },
 
     { "id": "j.HK", "kind": "normal", "startup": 10, "active": 5, "recovery": 8, "airborne": true,
@@ -183,7 +183,7 @@
       "animation": "otto/jHK_bota_descendo", "sfx": "impact_heavy", "vfx": "spark_heavy",
       "hits": [ { "frames": [10, 14], "damage": 1050, "hitstun": 19, "blockstun": 14, "hitstop": 14,
                   "pushback_hit": 2400, "pushback_block": 2800, "level": "overhead" } ],
-      "boxes": [ { "frames": [10, 14], "kind": "hit", "box": [1000, 1500, 4600, 3600] } ],
+      "boxes": [ { "frames": [10, 14], "kind": "hit", "box": [1500, 1500, 4600, 3600] } ],
       "meter_gain_hit": 60, "meter_gain_block": 30 },
 
     { "id": "6HP", "kind": "command_normal", "startup": 20, "active": 3, "recovery": 16,
@@ -191,28 +191,28 @@
       "animation": "otto/6HP_martelo_de_rebite", "sfx": "impact_heavy_hammer", "vfx": "spark_overhead",
       "hits": [ { "frames": [20, 22], "damage": 1000, "hitstun": 20, "blockstun": 14, "hitstop": 14,
                   "pushback_hit": 2800, "pushback_block": 3400, "level": "overhead" } ],
-      "boxes": [ { "frames": [20, 22], "kind": "hit", "box": [1500, 6000, 4500, 9000] } ],
+      "boxes": [ { "frames": [20, 22], "kind": "hit", "box": [2000, 6000, 4500, 9000] } ],
       "meter_gain_hit": 60, "meter_gain_block": 30 },
 
     { "id": "360P", "kind": "throw", "startup": 3, "active": 2, "recovery": 30, "techable": false,
       "notes": "Guindaste: arremesso de comando. Não pode ser escapado; muito punível se errar.",
       "animation": "otto/360P_guindaste", "sfx": "command_grab_chain", "vfx": "spark_grab",
-      "boxes": [ { "frames": [3, 4], "kind": "throw", "box": [1000, 0, 3400, 15000] } ],
-      "throw_damage": 2400, "throw_end_distance": 12000, "meter_gain_hit": 120 },
+      "boxes": [ { "frames": [3, 4], "kind": "throw", "box": [1500, 0, 3400, 15000] } ],
+      "throw_damage": 2400, "throw_end_distance": 13000, "meter_gain_hit": 120 },
 
     { "id": "360PP", "kind": "throw", "startup": 1, "active": 3, "recovery": 30, "techable": false,
       "meter_cost": 1000,
       "animation": "otto/360PP_guindaste_reforcado", "sfx": "command_grab_chain_ex", "vfx": "spark_grab_enhanced",
-      "boxes": [ { "frames": [1, 3], "kind": "throw", "box": [1000, 0, 4200, 15000] } ],
+      "boxes": [ { "frames": [1, 3], "kind": "throw", "box": [1500, 0, 4200, 15000] } ],
       "strike_invuln": [ [1, 3] ],
-      "throw_damage": 2800, "throw_end_distance": 12000 },
+      "throw_damage": 2800, "throw_end_distance": 13000 },
 
     { "id": "236P", "kind": "special", "startup": 14, "active": 4, "recovery": 18,
       "notes": "Solda Ponteada: investida de ombro com armadura de 1 golpe.",
       "animation": "otto/236P_solda_ponteada", "sfx": "special_shoulder", "vfx": "spark_special",
       "hits": [ { "frames": [14, 17], "damage": 1000, "hitstun": 22, "blockstun": 14, "hitstop": 14,
                   "pushback_hit": 4000, "pushback_block": 5200, "knockdown": true } ],
-      "boxes": [ { "frames": [14, 17], "kind": "hit", "box": [1500, 5000, 3800, 10000] } ],
+      "boxes": [ { "frames": [14, 17], "kind": "hit", "box": [2000, 5000, 3800, 10000] } ],
       "armor": [ { "frames": [4, 14], "hits": 1 } ],
       "velocity": [ { "frames": [4, 17], "vx": 800 } ],
       "meter_gain_hit": 100, "meter_gain_block": 50 },
@@ -222,7 +222,7 @@
       "hits": [ { "frames": [12, 15], "damage": 1300, "hitstun": 24, "blockstun": 16, "hitstop": 15,
                   "pushback_hit": 4000, "pushback_block": 5200, "launch": true, "launch_vx": 300,
                   "launch_vy": 800, "juggle_cost": 2 } ],
-      "boxes": [ { "frames": [12, 15], "kind": "hit", "box": [1500, 5000, 3800, 10000] } ],
+      "boxes": [ { "frames": [12, 15], "kind": "hit", "box": [2000, 5000, 3800, 10000] } ],
       "armor": [ { "frames": [1, 13], "hits": 2 } ],
       "velocity": [ { "frames": [3, 15], "vx": 950 } ] },
 
@@ -231,7 +231,7 @@
       "animation": "otto/214K_ancora", "sfx": "special_stomp_quake", "vfx": "spark_ground_crack",
       "hits": [ { "frames": [16, 18], "damage": 900, "hitstun": 22, "blockstun": 12, "hitstop": 14,
                   "pushback_hit": 3000, "pushback_block": 4000, "level": "low" } ],
-      "boxes": [ { "frames": [16, 18], "kind": "hit", "box": [1200, 0, 6200, 1500] } ],
+      "boxes": [ { "frames": [16, 18], "kind": "hit", "box": [1700, 0, 6200, 1500] } ],
       "meter_gain_hit": 100, "meter_gain_block": 50 },
 
     { "id": "623P", "kind": "special", "startup": 6, "active": 5, "recovery": 30, "ends_on_landing": true,
@@ -241,7 +241,7 @@
       "hits": [ { "frames": [6, 10], "damage": 1200, "hitstun": 30, "blockstun": 18, "hitstop": 14,
                   "pushback_hit": 1500, "pushback_block": 2600, "launch": true, "launch_vx": 200,
                   "launch_vy": 800, "juggle_cost": 2 } ],
-      "boxes": [ { "frames": [6, 10], "kind": "hit", "box": [800, 8000, 3500, 11000] } ],
+      "boxes": [ { "frames": [6, 10], "kind": "hit", "box": [1300, 8000, 3500, 11000] } ],
       "strike_invuln": [ [1, 7] ],
       "airborne_frames": [ [6, 30] ],
       "velocity": [ { "frames": [6, 6], "vx": 150, "vy": 1100, "impulse": true } ],
@@ -255,20 +255,20 @@
       "hits": [ { "frames": [8, 11], "damage": 3600, "hitstun": 40, "blockstun": 22, "hitstop": 18,
                   "pushback_hit": 3000, "pushback_block": 6000, "launch": true, "launch_vx": 500,
                   "launch_vy": 1200, "juggle_cost": 0 } ],
-      "boxes": [ { "frames": [8, 11], "kind": "hit", "box": [800, 0, 5000, 17000] } ],
+      "boxes": [ { "frames": [8, 11], "kind": "hit", "box": [1300, 0, 5000, 17000] } ],
       "strike_invuln": [ [1, 10] ],
       "throw_invuln": [ [1, 10] ],
       "velocity": [ { "frames": [1, 9], "vx": 700 } ] },
 
     { "id": "throw_f", "kind": "throw", "startup": 5, "active": 3, "recovery": 22,
       "animation": "otto/throw_forward_prensa", "sfx": "throw_grab_heavy",
-      "boxes": [ { "frames": [5, 7], "kind": "throw", "box": [1200, 2000, 2400, 13000] } ],
-      "throw_damage": 1300, "throw_end_distance": 10000 },
+      "boxes": [ { "frames": [5, 7], "kind": "throw", "box": [1700, 2000, 2400, 13000] } ],
+      "throw_damage": 1300, "throw_end_distance": 11000 },
 
     { "id": "throw_b", "kind": "throw", "startup": 5, "active": 3, "recovery": 22,
       "animation": "otto/throw_back_suplex_de_cais", "sfx": "throw_grab_heavy",
-      "boxes": [ { "frames": [5, 7], "kind": "throw", "box": [1200, 2000, 2400, 13000] } ],
-      "throw_damage": 1400, "throw_swaps_sides": true, "throw_end_distance": 10000 },
+      "boxes": [ { "frames": [5, 7], "kind": "throw", "box": [1700, 2000, 2400, 13000] } ],
+      "throw_damage": 1400, "throw_swaps_sides": true, "throw_end_distance": 11000 },
 
     { "id": "dash", "kind": "movement", "startup": 1, "active": 1, "recovery": 19,
       "animation": "otto/dash_forward",
@@ -290,7 +290,7 @@
       "animation": "otto/mare_contracorrente", "vfx": "mare_wave_back", "sfx": "mare_pushback",
       "hits": [ { "frames": [4, 6], "damage": 0, "hitstun": 18, "blockstun": 18, "hitstop": 10,
                   "pushback_hit": 9500, "pushback_block": 9500 } ],
-      "boxes": [ { "frames": [4, 6], "kind": "hit", "box": [600, 0, 5000, 18000] } ],
+      "boxes": [ { "frames": [4, 6], "kind": "hit", "box": [1100, 0, 5000, 18000] } ],
       "strike_invuln": [ [1, 7] ] }
   ],
 

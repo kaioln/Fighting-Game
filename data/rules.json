@@ -2,8 +2,8 @@
   // Regras globais. Unidades: distância em 0,1 mm (10000 = 1 m), tempo em frames (60 por segundo).
   // Todos os valores são provisórios e validados pelos testes em core/tests.
   "stage_half_width": 75000,
-  "max_distance": 52000,
-  "start_distance": 24000,
+  "max_distance": 53000,
+  "start_distance": 25000,
   "round_seconds": 99,
   "rounds_to_win": 2,
   "round_intro_frames": 90,

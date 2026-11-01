@@ -46,7 +46,7 @@ TEST("dados: todos os normais existem e comandos foram resolvidos") {
 
 TEST("validador: hitbox fora dos frames ativos é rejeitada") {
   std::string t = nadja_text();
-  const std::string from = "{ \"frames\": [4, 5], \"kind\": \"hit\", \"box\": [1500, 9000, 3800, 2000] }";
+  const std::string from = "{ \"frames\": [4, 5], \"kind\": \"hit\", \"box\": [2000, 9000, 3800, 2000] }";
   const std::string to = "{ \"frames\": [4, 9], \"kind\": \"hit\", \"box\": [1500, 9000, 3800, 2000] }";
   REQUIRE(t.find(from) != std::string::npos);
   t.replace(t.find(from), from.size(), to);
