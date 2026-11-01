@@ -21,16 +21,18 @@
     "hit": "Hit_Chest",
     "hit_crouch": "Hit_Head",
     "block": {
-      "clip": "Hit_Head",
-      "to": 8
+      "clip": "CMU_Boxing_13_18",
+      "from": 0,
+      "to": 10
     },
     "block_crouch": {
       "clip": "Crouch_Idle_Loop",
       "to": 1
     },
     "guard": {
-      "clip": "Hit_Head",
-      "to": 8
+      "clip": "CMU_Boxing_13_18",
+      "from": 0,
+      "to": 10
     },
     "juggle": "Hit_Knockback",
     "knockdown": "Death01",

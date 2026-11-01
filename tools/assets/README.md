@@ -6,7 +6,7 @@ Rodam no Blender 4.5 LTS em modo background, sem interface:
 ```bash
 blender -b --factory-startup --python export_chars.py -- <pasta_dos_pacotes> <repo>/assets
 blender -b --factory-startup --python retarget_cmu.py -- <pasta_bvh_cmu> <repo>/assets/animations/ual.glb <repo>/assets/animations/kicks.glb <pasta_previas>
-blender -b --factory-startup --python build_arena.py -- <pasta_dos_pacotes> <repo>/assets/arena/doca.glb <repo>/assets/arena/preview.png <abandoned_slipway_2k.hdr>
+blender -b --factory-startup --python build_arena.py -- <pasta_dos_pacotes> <repo>/assets/arena/doca.glb <repo>/assets/arena/preview.png <abandoned_slipway_2k.hdr> <porto_bruma.png>
 blender -b --factory-startup --python sky_png.py -- <abandoned_slipway_2k.hdr> <repo>/assets/sky/abandoned_slipway.png
 python glbinfo.py <arquivo.glb>...   # ossos, clipes, triângulos; confere se a ordem dos ossos é igual entre arquivos
 ```

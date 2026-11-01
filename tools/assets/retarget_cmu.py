@@ -142,6 +142,7 @@ def build_clip(name, stem, t0, t1):
     pel_rest_head = (tgt_mw @ tbones["pelvis"].head_local)
     toe_h = (tgt_mw @ tbones["ball_l"].head_local).z
 
+    pelvis_w = []
     for i, pw in enumerate(samples):
         world = {}
         for n, s in MAP.items():
@@ -180,6 +181,23 @@ def build_clip(name, stem, t0, t1):
         pbp = tgt.pose.bones["pelvis"]
         pbp.location = local
         pbp.keyframe_insert("location", frame=i + 1)
+        pelvis_w.append(target_w)
+    # apoio no chão: a proporção das pernas difere, então mede o pé mais baixo do clipe já retargetado
+    # e desce (ou sobe) o quadril para o pé encostar no chão
+    lowest = 1e9
+    for i in range(len(samples)):
+        scene.frame_set(i + 1)
+        for b in ("ball_l", "ball_r", "foot_l", "foot_r"):
+            lowest = min(lowest, (tgt_mw @ tgt.pose.bones[b].head).z)
+    dz = lowest - toe_h
+    if abs(dz) > 0.005:
+        pel = tbones["pelvis"]
+        par_pose = tgt_mw @ tbones["root"].matrix_local
+        rel = tbones["root"].matrix_local.inverted() @ pel.matrix_local
+        for i, tw in enumerate(pelvis_w):
+            pbp.location = (par_pose @ rel).inverted() @ Vector((tw.x, tw.y, tw.z - dz))
+            pbp.keyframe_insert("location", frame=i + 1)
+    print("GROUND", name, "dz", round(dz, 3))
     tgt.animation_data.action = None
     tr = tgt.animation_data.nla_tracks.new()
     tr.name = name

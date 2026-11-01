@@ -92,7 +92,7 @@ class Palette:
         cx, cy = i % GRID, i // GRID
         return ((cx + 0.5) / GRID, 1.0 - (cy + 0.5) / GRID)
 
-    def material(self, name):
+    def material(self, name, glow=()):
         n = CELL * GRID
         img = bpy.data.images.new(name, n, n, alpha=False)
         img.colorspace_settings.name = "sRGB"
@@ -113,6 +113,29 @@ class Palette:
         img.save()
         img = bpy.data.images.load(path, check_existing=False)
         img.name = name
+        emit = None
+        if glow:
+            # mapa emissivo: só as células de brasa acesas (glTF emissiveTexture; o jogo soma à cor final)
+            gl = {tuple(round(c, 3) for c in g) for g in glow}
+            epx = [0.0] * (n * n * 4)
+            for i, rgb in enumerate(self.colors):
+                if rgb not in gl:
+                    continue
+                cx, cy = i % GRID, i // GRID
+                for y in range(CELL):
+                    row = n - 1 - (cy * CELL + y)
+                    for x in range(CELL):
+                        k = (row * n + cx * CELL + x) * 4
+                        epx[k:k + 4] = [*rgb, 1.0]
+            for k in range(3, len(epx), 4):
+                epx[k] = 1.0
+            eimg = bpy.data.images.new(name + "_emissao", n, n, alpha=False)
+            eimg.pixels = epx
+            epath = os.path.join(PREV, name + "_emissao.png")
+            eimg.filepath_raw = epath
+            eimg.file_format = "PNG"
+            eimg.save()
+            emit = bpy.data.images.load(epath, check_existing=False)
         m = bpy.data.materials.new(name)
         m.use_nodes = True
         t = m.node_tree.nodes.new("ShaderNodeTexImage")
@@ -121,6 +144,12 @@ class Palette:
         bsdf = m.node_tree.nodes["Principled BSDF"]
         m.node_tree.links.new(t.outputs["Color"], bsdf.inputs["Base Color"])
         bsdf.inputs["Roughness"].default_value = 0.8
+        if emit is not None:
+            et = m.node_tree.nodes.new("ShaderNodeTexImage")
+            et.image = emit
+            et.interpolation = "Closest"
+            m.node_tree.links.new(et.outputs["Color"], bsdf.inputs["Emission Color"])
+            bsdf.inputs["Emission Strength"].default_value = 1.0
         return m
 
 
@@ -203,7 +232,7 @@ class Body:
         return cur
 
 
-def shell(body, name, faces, offset, paint, pal, scale_about=None, xform=None, reweight=None, smooth=0):
+def shell(body, name, faces, offset, paint, pal, scale_about=None, xform=None, reweight=None, smooth=0, cuts=()):
     """Cria a casca: duplica o corpo, mantém só `faces`, empurra ao longo da normal e pinta cada face."""
     src = body.obj
     o = src.copy()
@@ -220,6 +249,28 @@ def shell(body, name, faces, offset, paint, pal, scale_about=None, xform=None, r
     for v in bm.verts:
         v.co += v.normal * offset
     bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.index not in faces], context="FACES")
+    mw = src.matrix_world
+    mwi = mw.inverted()
+    if cuts:
+        # bainha reta: cada vértice da borda encosta no plano de corte mais próximo
+        border = {v for e in bm.edges if len(e.link_faces) == 1 for v in e.verts}
+        for v in border:
+            w = mw @ v.co
+            best = None
+            for ax, val in cuts:
+                if ax == "ax":
+                    d = abs(abs(w.x) - val)
+                else:
+                    d = abs(w["xyz".index(ax)] - val)
+                if d < 0.05 and (best is None or d < best[0]):
+                    best = (d, ax, val)
+            if best:
+                _, ax, val = best
+                if ax == "ax":
+                    w.x = val if w.x >= 0 else -val
+                else:
+                    w["xyz".index(ax)] = val
+                v.co = mwi @ w
     if smooth:
         # arredonda (tira os dedos do pé de dentro da bota) e reinfla o volume que a suavização come
         for _ in range(smooth):
@@ -239,6 +290,18 @@ def shell(body, name, faces, offset, paint, pal, scale_about=None, xform=None, r
         uv = pal.uv(paint(c, f))
         for lp in f.loops:
             lp[uvl].uv = uv
+    if offset > 0.003:
+        # anel de bainha: estende a borda para dentro, fechando a fresta entre a roupa e a pele
+        bm.normal_update()
+        edges = [e for e in bm.edges if len(e.link_faces) == 1]
+        if edges:
+            nrm = {v: v.normal.copy() for e in edges for v in e.verts}
+            res = bmesh.ops.extrude_edge_only(bm, edges=edges)
+            for v in res["geom"]:
+                if isinstance(v, bmesh.types.BMVert):
+                    src_v = next((e.other_vert(v) for e in v.link_edges if e.other_vert(v) in nrm), None)
+                    if src_v is not None:
+                        v.co -= nrm[src_v] * (offset + 0.003)
     if scale_about is not None:
         center, s = scale_about
         for v in bm.verts:
@@ -317,7 +380,10 @@ def build_nadja(body, pal):
 
     # top escuro (cropped): tronco acima do umbigo
     top = body.select(lambda b, c: b in TORSO and c.z >= S2 - 0.01)
-    pieces.append(shell(body, "top", top, 0.004, lambda c, f: top_c, pal))
+    up_x = L["upperarm_l"].x - 0.03
+    N = L["neck_01"].z
+    pieces.append(shell(body, "top", top, 0.004, lambda c, f: top_c, pal,
+                        cuts=(("z", S2 - 0.01), ("z", N + 0.01), ("ax", up_x))))
     covered |= top
 
     # jaqueta: aberta na frente, manga longa na esquerda, ombro cortado na direita
@@ -331,51 +397,55 @@ def build_nadja(body, pal):
         return False
     jacket = body.select(jacket_pred)
 
-    def jacket_paint(c, f):
-        if c.x > 0 and shoulder + 0.08 < c.x < shoulder + 0.11:
-            return yellow  # faixa amarelo-sinalização na manga longa
-        if c.x > wrist - 0.05:
-            return brick  # punho
-        if abs(c.x) < shoulder and c.y > 0.02 and c.z > S2 + 0.14 and (c.x + (c.z - S2) * 0.6) > 0.05:
-            return brick  # painel diagonal das costas
-        if c.y < -0.02 and c.z > L["neck_01"].z - 0.06:
-            return brick  # lapela
-        if c.x < -shoulder:
-            return brick_dk  # borda do ombro cortado
-        return leather if (int((c.z - S2) * 40) % 4) else leather_hi
-    pieces.append(shell(body, "jaqueta", jacket, 0.013, jacket_paint, pal))
+    jcuts = (("z", S2 + 0.05), ("ax", 0.075), ("z", N - 0.02), ("z", N + 0.01),
+             ("x", wrist - 0.015), ("x", -(shoulder + 0.07)))
+    pieces.append(shell(body, "jaqueta", jacket, 0.013, lambda c, f: leather, pal, cuts=jcuts))
     covered |= jacket
+    # painel tijolo nas costas (pala), faixa amarela e punho na manga longa, lapela
+    yoke = body.select(lambda b, c: b in TORSO and c.y > 0.0 and c.z >= S2 + 0.17)
+    pieces.append(shell(body, "jaqueta_pala", yoke, 0.016, lambda c, f: brick, pal,
+                        cuts=(("z", S2 + 0.17), ("y", 0.0), ("z", N + 0.01), ("ax", up_x))))
+    stripe = body.select(lambda b, c: b in ("upperarm_l", "lowerarm_l") and shoulder + 0.08 <= c.x <= shoulder + 0.12)
+    pieces.append(shell(body, "jaqueta_faixa", stripe, 0.016, lambda c, f: yellow, pal,
+                        cuts=(("x", shoulder + 0.08), ("x", shoulder + 0.12))))
+    cuff = body.select(lambda b, c: b == "lowerarm_l" and wrist - 0.06 <= c.x < wrist - 0.015)
+    pieces.append(shell(body, "jaqueta_punho", cuff, 0.016, lambda c, f: brick, pal,
+                        cuts=(("x", wrist - 0.06), ("x", wrist - 0.015))))
+    lapel = body.select(lambda b, c: b in TORSO and c.y < -0.03 and N - 0.08 <= c.z <= N - 0.02 and 0.075 <= abs(c.x) <= 0.13)
+    pieces.append(shell(body, "jaqueta_lapela", lapel, 0.016, lambda c, f: brick, pal,
+                        cuts=(("z", N - 0.08), ("z", N - 0.02), ("ax", 0.075), ("ax", 0.13))))
 
     # cinto
     belt = body.select(lambda b, c: b in ("pelvis", "spine_01") and P + 0.06 <= c.z <= P + 0.12)
-    pieces.append(shell(body, "cinto", belt, 0.017,
-                        lambda c, f: steel if (c.y < -0.05 and abs(c.x) < 0.035) else belt_c, pal))
+    pieces.append(shell(body, "cinto", belt, 0.017, lambda c, f: belt_c, pal,
+                        cuts=(("z", P + 0.06), ("z", P + 0.12))))
+    buckle = body.select(lambda b, c: b in ("pelvis", "spine_01") and P + 0.065 <= c.z <= P + 0.115 and c.y < -0.05 and abs(c.x) < 0.035)
+    pieces.append(shell(body, "fivela", buckle, 0.021, lambda c, f: steel, pal,
+                        cuts=(("z", P + 0.065), ("z", P + 0.115), ("ax", 0.035))))
 
     # calça cargo (até o começo das faixas)
     pants = body.select(lambda b, c: b in LEGS and A + 0.26 <= c.z <= P + 0.12)
 
-    def pants_paint(c, f):
-        return brick
-    pieces.append(shell(body, "calca", pants, 0.009, pants_paint, pal))
+    pieces.append(shell(body, "calca", pants, 0.009, lambda c, f: brick, pal,
+                        cuts=(("z", P + 0.12), ("z", A + 0.26))))
     covered |= pants
 
     # faixas nas canelas
     wraps = body.select(lambda b, c: b in ("calf_l", "calf_r") and A + 0.07 <= c.z < A + 0.28)
-    pieces.append(shell(body, "faixas", wraps, 0.012,
-                        lambda c, f: wrap if int((c.z - A) * 36 + c.x * 6) % 2 else wrap_dk, pal))
+    pieces.append(shell(body, "faixas", wraps, 0.012, lambda c, f: wrap, pal,
+                        cuts=(("z", A + 0.07), ("z", A + 0.28))))
     covered |= wraps
 
     # botas
     boots = body.select(lambda b, c: b in FEET or (b in ("calf_l", "calf_r") and c.z < A + 0.11))
     pieces.append(shell(body, "botas", boots, 0.020,
-                        lambda c, f: sole if c.z < 0.025 else (yellow if abs(c.z - (A + 0.03)) < 0.006 and c.y > 0 else boot), pal,
-                        smooth=8))
+                        lambda c, f: sole if c.z < 0.025 else boot, pal, smooth=8, cuts=(("z", A + 0.11),)))
     covered |= boots
 
     # luvas sem dedo
     gl = body.select(lambda b, c: b in ("hand_l", "hand_r") or b.startswith("thumb_01") or
                      (is_finger(b) and b.endswith(("_01_l", "_01_r"))))
-    pieces.append(shell(body, "luvas", gl, 0.004, lambda c, f: glove, pal))
+    pieces.append(shell(body, "luvas", gl, 0.004, lambda c, f: glove, pal, cuts=(("ax", wrist - 0.005),)))
     covered |= gl
 
     # capacete amarelo e preto pendurado no cinto, do lado esquerdo
@@ -425,41 +495,43 @@ def build_otto(body, pal):
     tk = body.select(lambda b, c: b in TORSO and c.z >= S1 - 0.04 and
                      not (b.startswith("clavicle") and abs(c.x) > 0.14))
 
-    def tank_paint(c, f):
-        if c.y > 0.0 and abs(abs(c.x) - (N - c.z) * 0.55) < 0.028 and c.z > S2 - 0.05:
-            return apron_dk  # alças cruzadas nas costas
-        if c.z > N - 0.08 and abs(abs(c.x) - 0.10) < 0.025:
-            return apron_dk  # alças nos ombros
-        return tank
-    pieces.append(shell(body, "regata", tk, 0.005, tank_paint, pal))
+    up_x = L["upperarm_l"].x - 0.03
+    pieces.append(shell(body, "regata", tk, 0.005, lambda c, f: tank, pal,
+                        cuts=(("z", S1 - 0.04), ("z", N + 0.01), ("ax", up_x))))
     covered |= tk
+    # alças do avental: retas, por cima dos ombros e descendo pelas costas
+    straps = body.select(lambda b, c: b in TORSO and 0.075 <= abs(c.x) <= 0.12 and (c.y > 0.0 or c.z > N - 0.09)
+                         and c.z >= S2 - 0.06)
+    pieces.append(shell(body, "alcas", straps, 0.010, lambda c, f: apron_dk, pal,
+                        cuts=(("ax", 0.075), ("ax", 0.12), ("z", S2 - 0.06), ("z", N + 0.01))))
 
     # calça azul-aço
     pants = body.select(lambda b, c: b in LEGS and A + 0.13 <= c.z <= P + 0.13)
-    pieces.append(shell(body, "calca", pants, 0.010,
-                        lambda c, f: pants_c, pal))
+    pieces.append(shell(body, "calca", pants, 0.010, lambda c, f: pants_c, pal,
+                        cuts=(("z", P + 0.13), ("z", A + 0.13))))
     covered |= pants
 
     # cinto
     belt = body.select(lambda b, c: b in ("pelvis", "spine_01") and P + 0.07 <= c.z <= P + 0.13)
-    pieces.append(shell(body, "cinto", belt, 0.020,
-                        lambda c, f: rivet if (c.y < -0.08 and abs(c.x) < 0.04) else belt_c, pal))
+    pieces.append(shell(body, "cinto", belt, 0.020, lambda c, f: belt_c, pal,
+                        cuts=(("z", P + 0.07), ("z", P + 0.13))))
 
     # avental de couro: frente do peito até abaixo do joelho, com rebites
     ap = body.select(lambda b, c: c.y < -0.01 and (
         (b in TORSO and c.z < N - 0.06 and abs(c.x) < 0.17) or
-        (b in ("pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r") and c.z > K - 0.12 and abs(c.x) < 0.20)))
+        (b in ("pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r") and c.z > K - 0.12 and abs(c.x) < 0.17)))
 
     def apron_paint(c, f):
         for rx, rz in ((0.10, N - 0.10), (-0.10, N - 0.10), (0.14, S1), (-0.14, S1)):
             if abs(c.x - rx) < 0.014 and abs(c.z - rz) < 0.014:
                 return rivet
-        if abs(c.x) < 0.07 and S1 - 0.10 < c.z < S1 + 0.02:
-            return apron_dk  # bolso
-        if abs(c.x) > 0.16 or c.z < K - 0.08:
-            return apron_dk  # bainha
         return apron
-    pieces.append(shell(body, "avental", ap, 0.030, apron_paint, pal))
+    pieces.append(shell(body, "avental", ap, 0.030, apron_paint, pal,
+                        cuts=(("ax", 0.17), ("z", N - 0.06), ("z", K - 0.12), ("y", -0.01))))
+    pocket = body.select(lambda b, c: c.y < -0.01 and abs(c.x) <= 0.07 and S1 - 0.10 <= c.z <= S1 + 0.02 and
+                         b in TORSO | {"pelvis"})
+    pieces.append(shell(body, "avental_bolso", pocket, 0.034, lambda c, f: apron_dk, pal,
+                        cuts=(("ax", 0.07), ("z", S1 - 0.10), ("z", S1 + 0.02))))
 
     # luvas longas com brasa nos dedos
     gl = body.select(lambda b, c: b in ("hand_l", "hand_r") or is_finger(b) or
@@ -469,9 +541,9 @@ def build_otto(body, pal):
         return ember if any(t in b for t in FINGER_TIPS for b in [body.fdom[f.index]] if False) else glove
     # brasa: pontas dos dedos (pintadas por osso) e uma costura no punho
     tips = {i for i in gl if any(t in body.fdom[i] + "_" for t in FINGER_TIPS)}
-    seam = {i for i in gl if abs(abs(body.fc[i].x) - (elbow + 0.12)) < 0.012}
+    seam = set()  # costura de brasa vira peça própria (borda reta), abaixo
     glove_faces = sorted(gl)
-    o = shell(body, "luvas", gl, 0.013, lambda c, f: glove, pal, smooth=2)
+    o = shell(body, "luvas", gl, 0.013, lambda c, f: glove, pal, smooth=2, cuts=(("ax", elbow + 0.07),))
     # repinta (a casca preserva a ordem relativa das faces mantidas)
     me = o.data
     uv = me.uv_layers[0].data
@@ -482,12 +554,15 @@ def build_otto(body, pal):
                 uv[li].uv = hot
     pieces.append(o)
     covered |= gl
+    band = body.select(lambda b, c: b in ("lowerarm_l", "lowerarm_r") and elbow + 0.11 <= abs(c.x) <= elbow + 0.13)
+    pieces.append(shell(body, "luvas_brasa", band, 0.016, lambda c, f: ember, pal,
+                        cuts=(("ax", elbow + 0.11), ("ax", elbow + 0.13))))
 
     # botas com biqueira de aço
     boots = body.select(lambda b, c: b in FEET or (b in ("calf_l", "calf_r") and c.z < A + 0.14))
     pieces.append(shell(body, "botas", boots, 0.024,
                         lambda c, f: sole if c.z < 0.025 else (toe if c.y < L["ball_l"].y - 0.02 else boot), pal,
-                        smooth=8))
+                        smooth=8, cuts=(("z", A + 0.14),)))
     covered |= boots
 
     # máscara de solda levantada na testa: casca da frente do rosto, girada para cima
@@ -506,6 +581,9 @@ def build_otto(body, pal):
     return pieces, covered
 
 
+GLOW = {"otto": (srgb(255, 120, 30),)}
+
+
 # ---------------------------------------------------------------- montagem
 def build(body_name, out_name, hair, hair_rgb, builder):
     reset()
@@ -521,7 +599,7 @@ def build(body_name, out_name, hair, hair_rgb, builder):
     body = Body(body_obj, arm)
     pal = Palette()
     pieces, covered = builder(body, pal)
-    mat = pal.material(f"roupa_{out_name}")
+    mat = pal.material(f"roupa_{out_name}", glow=GLOW.get(out_name, ()))
     outfit = join(pieces, f"roupa_{out_name}", mat)
     delete_body_faces(body, body.erode(covered, 2))
     for img in bpy.data.images:

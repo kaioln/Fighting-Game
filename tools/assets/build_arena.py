@@ -16,7 +16,7 @@ import bpy
 from mathutils import Vector
 
 argv = sys.argv[sys.argv.index("--") + 1:]
-SRC, OUT, PREVIEW, HDRI = argv
+SRC, OUT, PREVIEW, HDRI, BRUMA = argv
 MAX_VERTS = 60000  # raylib usa índices de 16 bits
 
 # escala de cada kit para metros reais
@@ -40,9 +40,17 @@ def find(name):
     return hits[0]
 
 
-def place(name, x, y, z=0.0, rot=0.0, s=1.0):
-    path = find(name)
-    kit = path.split(os.sep)[-4]
+PP = os.path.normpath(os.path.join(SRC, "..", "..", "assets", "third_party", "polypizza"))
+
+
+def place(name, x, y, z=0.0, rot=0.0, s=1.0, mat=None, tile=2.5, keep=None):
+    """Kenney: escala do kit. "pp:<id>": modelo do Poly Pizza, escala absoluta s, materiais próprios.
+    mat: troca o material por um PBR com UV de caixa (tile em metros); keep: materiais preservados."""
+    if name.startswith("pp:"):
+        path, kit = os.path.join(PP, name[3:] + ".glb"), "polypizza"
+    else:
+        path = find(name)
+        kit = path.split(os.sep)[-4]
     before = set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=path)
     new = [o for o in bpy.data.objects if o not in before]
@@ -56,12 +64,18 @@ def place(name, x, y, z=0.0, rot=0.0, s=1.0):
                 m = slot.material
                 if m is None:
                     continue
+                if mat is not None and not (keep and any(k_ in m.name.lower() for k_ in keep)):
+                    slot.material = mat
+                    o["boxuv"] = tile
+                    continue
+                if kit == "polypizza":
+                    continue
                 if kit not in kit_material:
                     m.name = f"kenney_{kit}"
                     kit_material[kit] = m
                 slot.material = kit_material[kit]
             placed.append(o)
-    k = KIT_SCALE[kit] * s
+    k = (1.0 if kit == "polypizza" else KIT_SCALE[kit]) * s
     root.scale = (k, k, k)
     root.rotation_euler = (0, 0, math.radians(rot))
     root.location = (x, y, z)
@@ -128,6 +142,18 @@ quay_wall = tex_material("cais_muro", "Concrete048_1K-JPG", 3.0, (0.6, 0.58, 0.5
 asphalt = tex_material("patio_asfalto", "Asphalt031_1K-JPG", 4.0)
 steel = tex_material("chapa_ondulada", "CorrugatedSteel007A_1K-JPG", 2.0)
 water = color_material("agua", (0.10, 0.22, 0.26), 0.15)
+# contêineres: pintura branca com ferrugem (ambientCG PaintedMetal012) tingida por contêiner
+cont_mat = {
+    "a": tex_material("conteiner_vermelho", "PaintedMetal012_1K-JPG", 2.6, (0.62, 0.24, 0.17)),
+    "b": tex_material("conteiner_verde", "PaintedMetal012_1K-JPG", 2.6, (0.24, 0.46, 0.38)),
+    "c": tex_material("conteiner_azul", "PaintedMetal012_1K-JPG", 2.6, (0.26, 0.38, 0.58)),
+}
+# madeira molhada (ambientCG Wood080 escurecida) para caixotes e píer
+wet_wood = tex_material("madeira_molhada", "Wood080_1K-JPG", 1.6, (0.50, 0.44, 0.38))
+
+
+def container(variant, x, y, z=0.0, rot=0.0):
+    return place("shipping-container-" + variant, x, y, z, rot=rot, mat=cont_mat[variant], tile=2.6)
 
 # ---------- chão do cais (plano z=0, superfície contínua) ----------
 box("cais_piso", (-60, -12, -0.4), (60, 4, 0.0), concrete)
@@ -142,28 +168,27 @@ for side in (-1, 1):
     cx = side * (7.5 + C_W / 2)
     for i, y in enumerate((-4.6, 1.5, 7.6)):
         for level in range(3 if i == 1 else 2):
-            nm = "shipping-container-" + "abc"[(i + level + (side > 0)) % 3]
-            place(nm, cx, y, level * C_H)
+            container("abc"[(i + level + (side > 0)) % 3], cx, y, level * C_H)
     # segunda fileira atrás da parede (dá volume quando a câmera encosta)
     for y in (-1.5, 4.6):
-        place("shipping-container-" + "cb"[side > 0], cx + side * C_W * 1.05, y, 0)
+        container("cb"[side > 0], cx + side * C_W * 1.05, y, 0)
 
 # ---------- fundo próximo (y 3..9): carga baixa, sem tapar os lutadores ----------
 place("cargo-pile-a", -11.5, 6.0, rot=90, s=0.33)
 place("cargo-pile-b", 11.5, 6.2, rot=90, s=0.33)
-place("crate", -5.6, 3.6, rot=12, s=0.6)
-place("crate", -4.7, 3.9, rot=-8, s=0.6)
-place("crate", -5.2, 3.7, z=0.82, rot=30, s=0.6)
-place("barrel", 4.8, 3.5, s=0.35)
-place("barrel", 5.4, 3.8, s=0.35)
-place("barrel", 5.0, 4.3, s=0.35)
-place("box-large", 2.2, 5.8, rot=5, s=0.6)
-place("box-wide", 2.9, 5.9, rot=-10, s=0.6)
+place("crate", -5.6, 3.6, rot=12, s=0.6, mat=wet_wood, tile=1.2)
+place("crate", -4.7, 3.9, rot=-8, s=0.6, mat=wet_wood, tile=1.2)
+place("crate", -5.2, 3.7, z=0.82, rot=30, s=0.6, mat=wet_wood, tile=1.2)
+place("barrel", 4.8, 3.5, s=0.35, mat=cont_mat["a"], tile=0.8)
+place("barrel", 5.4, 3.8, s=0.35, mat=cont_mat["a"], tile=0.8)
+place("barrel", 5.0, 4.3, s=0.35, mat=cont_mat["a"], tile=0.8)
+place("box-large", 2.2, 5.8, rot=5, s=0.6, mat=wet_wood, tile=1.2)
+place("box-wide", 2.9, 5.9, rot=-10, s=0.6, mat=wet_wood, tile=1.2)
 
 # pórtico: pilares de contêineres e passarela por cima em y = 10,5 (centro aberto para a água)
 for k, x in enumerate((-17.0, -9.5, 9.5, 17.0)):
     for level in range(2):
-        place("shipping-container-" + "abc"[(k + level) % 3], x, 10.5, level * C_H, rot=90)
+        container("abc"[(k + level) % 3], x, 10.5, level * C_H, rot=90)
 cat_z = 2 * C_H
 x = -19.0
 while x <= 19.0:
@@ -182,14 +207,52 @@ place("water-tower", 31.0, 8.0)
 
 # ---------- água: rebocador e cargueiro ao fundo ----------
 place("boat-tug-a", -11.0, 18.0, z=-0.6, rot=70, s=0.35)
-place("ship-cargo-a", 7.0, 36.0, z=-0.6, rot=90, s=0.42)
 place("buoy", 14.0, 16.0, z=-0.6, s=0.35)
 
-# ---------- outra margem (y ~ 38-40): silhueta industrial ----------
-for x, nm, r in ((-26, "building-f", 0), (-14, "chimney-large", 0), (-8, "building-a", 0),
-                 (16, "detail-tank-large", 0), (22, "building-c", 0), (30, "chimney-large", 0)):
-    place(nm, x, 39.0, z=-0.5, rot=r)
-box("margem_oposta", (-80, 36.5, -2.0), (80, 42, -0.5), quay_wall)
+# a outra margem agora é o painel Porto Bruma (abaixo)
+
+# ---------- detalhes do cais (Poly Pizza; licenças em assets/LICENSES.md) ----------
+# guindastes: torre (J-Toastie, CC-BY 3.0) e treliça (Kieran Farr, CC-BY 3.0)
+place("pp:gCcpjaxFdv", -24.0, 8.0, rot=200, s=2.0)
+place("pp:cm5teXZ5Ctr", 27.0, 9.0, rot=-20, s=5.0)
+# postes na borda do cais (Quaternius, CC0)
+for x in (-12.5, 12.5):
+    place("pp:nFwrlcLvM5", x, 11.7, rot=180, s=1.0)
+# cabeços de amarração com corda (J-Toastie, CC-BY 3.0)
+for x in (-5.5, 0.0, 5.5):
+    place("pp:JSQJ07PFj2", x, 12.25, s=0.5)
+place("pp:dkNzi6oDQj", -4.7, 12.0, rot=30, s=1.1)
+place("pp:dkNzi6oDQj", 0.9, 11.9, rot=-50, s=1.1)
+# correntes penduradas da passarela (mrzombieuk, CC-BY 3.0)
+for x in (-14.5, 14.0):
+    place("pp:U8MTqEf3dq", x, 10.5, z=cat_z - 3.6, s=0.1)
+# empilhadeira e paleteira (KolosStudios, CC-BY 3.0)
+place("pp:DTQBuenKJY", -12.5, 2.5, rot=60, s=1.35)
+place("pp:snDq7v3GRO", 3.8, 5.6, rot=-70, s=0.9)
+# píer de madeira sobre a água (Quaternius "Dock Wide", CC0) com madeira molhada
+place("pp:XndOrGa7rN", -19.0, 17.0, z=-0.9, rot=90, s=0.55, mat=wet_wood, tile=1.6, keep=("rope",))
+
+# ---------- fundo: Porto Bruma (imagem gerada para o projeto), painel a ~100 m ----------
+bruma = bpy.data.materials.new("porto_bruma")
+bruma.use_nodes = True
+bt = bruma.node_tree.nodes.new("ShaderNodeTexImage")
+bt.image = bpy.data.images.load(BRUMA)
+bruma.node_tree.links.new(bt.outputs["Color"], bruma.node_tree.nodes["Principled BSDF"].inputs["Base Color"])
+bme = bpy.data.meshes.new("porto_bruma")
+# imagem 1088x608: costa na linha 520; usa as linhas 240-608 (céu acima da costa e um pouco de água)
+BW, BY, BZ = 140.0, 100.0, 0.0
+px_m = 1088 / BW
+btop, bbot = (520 - 240) / px_m, (608 - 520) / px_m
+bme.from_pydata([(-BW / 2, BY, BZ - bbot), (BW / 2, BY, BZ - bbot), (BW / 2, BY, BZ + btop), (-BW / 2, BY, BZ + btop)],
+                [], [(0, 1, 2, 3)])  # face voltada para -Y (câmera); o jogo descarta o verso
+buv = bme.uv_layers.new(name="UVMap")
+vmax = (608 - 240) / 608
+for li, vi in enumerate(bme.polygons[0].vertices):
+    buv.data[li].uv = ((0, 0), (1, 0), (1, vmax), (0, vmax))[vi]
+bo = bpy.data.objects.new("porto_bruma", bme)
+bo.data.materials.append(bruma)
+scene.collection.objects.link(bo)
+placed.append(bo)
 
 # galpão de chapa ondulada fechando o fundo à esquerda (textura ambientCG)
 box("galpao_parede", (-42, 13.0, 0.0), (-30, 14.0, 9.0), steel)
@@ -214,9 +277,26 @@ for o in meshes:
 bpy.context.view_layer.objects.active = meshes[0]
 bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
+for o in meshes:
+    t = o.get("boxuv")
+    if not t:
+        continue
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    for layer in list(bm.loops.layers.uv):
+        bm.loops.layers.uv.remove(layer)
+    uv = bm.loops.layers.uv.new("UVMap")
+    for f in bm.faces:
+        ax = max(range(3), key=lambda i: abs(f.normal[i]))
+        u_ax, v_ax = [(1, 2), (0, 2), (0, 1)][ax]
+        for lp in f.loops:
+            lp[uv].uv = (lp.vert.co[u_ax] / t, lp.vert.co[v_ax] / t)
+    bm.to_mesh(o.data)
+    bm.free()
+
 # faixa de luta livre? (x em [-7,5, 7,5], y em [-1,5, 1,5], acima do piso)
 for o in meshes:
-    if o.name.startswith(("cais_", "patio_", "agua")):
+    if o.name.startswith(("cais_", "patio_", "agua", "porto_bruma")):
         continue
     for v in o.data.vertices:
         w = o.matrix_world @ v.co

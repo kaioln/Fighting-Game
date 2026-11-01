@@ -611,7 +611,7 @@ void main() {
 
 const char* kLitFS = R"(#version 330
 in vec3 fragPos; in vec2 fragTexCoord; in vec4 fragColor; in vec3 fragNormal;
-uniform sampler2D texture0; uniform vec4 colDiffuse;
+uniform sampler2D texture0; uniform vec4 colDiffuse; uniform sampler2D emissionMap;
 uniform vec3 lightDir; uniform vec3 lightColor; uniform vec3 ambient; uniform vec3 viewPos;
 uniform vec3 fogColor; uniform float fogNear; uniform float fogFar;
 out vec4 finalColor;
@@ -623,6 +623,7 @@ void main() {
   vec3 v = normalize(viewPos - fragPos);
   float rim = pow(1.0 - max(dot(n, v), 0.0), 3.0) * 0.35;
   vec3 c = base.rgb * (ambient + lightColor * d) + lightColor * rim * 0.5;
+  c += texture(emissionMap, fragTexCoord).rgb * 0.45;  // brilho próprio (brasa das luvas do Otto)
   float f = clamp((length(viewPos - fragPos) - fogNear) / (fogFar - fogNear), 0.0, 1.0);
   finalColor = vec4(mix(c, fogColor, f * 0.6), base.a);
 })";
@@ -1019,8 +1020,17 @@ std::string join_path(const std::string& a, const std::string& b) {
 }
 
 void apply_shader(Model& m, Shader sh) {
+  // Material sem mapa emissivo recebe um pixel preto: sem isso o sampler leria a unidade de outro material.
+  static Texture2D no_emission{};
+  if (no_emission.id == 0) {
+    Image black = GenImageColor(1, 1, BLACK);
+    no_emission = LoadTextureFromImage(black);
+    UnloadImage(black);
+  }
   for (int i = 0; i < m.materialCount; ++i) {
     m.materials[i].shader = sh;
+    if (m.materials[i].maps[MATERIAL_MAP_EMISSION].texture.id == 0)
+      m.materials[i].maps[MATERIAL_MAP_EMISSION].texture = no_emission;
     // O glTF chega sem mipmaps: sem eles, texturas repetidas no chão serrilham à distância.
     Texture2D& t = m.materials[i].maps[MATERIAL_MAP_DIFFUSE].texture;
     if (t.id > 1 && t.mipmaps <= 1) {
@@ -1048,6 +1058,7 @@ void draw_boxes_3d(const App& a, int p) {
 struct Options {
   std::string smoke_out;  // --smoke <png>: roda uma luta roteirizada e salva uma captura
   int smoke_frames = 240;
+  bool smoke_guard = false;  // --guard: no --smoke, o P2 fica parado segurando para trás (captura de bloqueio)
 };
 
 // Roteiro do modo --smoke (usado pela CI para conferir que tudo carrega e anima).
@@ -1068,6 +1079,7 @@ int main(int argc, char** argv) {
     const std::string a = argv[i];
     if (a == "--smoke" && i + 1 < argc) opt.smoke_out = argv[++i];
     else if (a == "--frames" && i + 1 < argc) opt.smoke_frames = std::max(1, std::atoi(argv[++i]));
+    else if (a == "--guard") opt.smoke_guard = true;
   }
   const bool smoke = !opt.smoke_out.empty();
   // --anims <arquivo.glb>: lista os clipes de animação (ajuda a escrever data/presentation/*.json).
@@ -1125,6 +1137,7 @@ int main(int argc, char** argv) {
   const int loc_ffar = GetShaderLocation(lit, "fogFar");
   lit.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(lit, "matModel");
   lit.locs[SHADER_LOC_MATRIX_NORMAL] = GetShaderLocation(lit, "matNormal");
+  lit.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(lit, "emissionMap");
 
   Fighter3D fighters[2];
   ArenaLook arena_look;
@@ -1259,6 +1272,9 @@ int main(int argc, char** argv) {
     if (smoke) {
       in.p[0] = smoke_input(0, smoke_frame);
       in.p[1] = smoke_input(1, smoke_frame);
+      // guarda só enquanto o P1 ataca (segurar para trás o tempo todo faria o P2 recuar até a parede)
+      if (opt.smoke_guard)
+        in.p[1] = smoke_frame % 90 >= 31 ? (app.state.f[1].facing > 0 ? btn::Left : btn::Right) : InputBits{0};
     } else {
       in.p[0] = static_cast<InputBits>(read_keys(kKeysP1) | read_pad(0));
       if (app.dummy == Dummy::Human) in.p[1] = static_cast<InputBits>(read_keys(kKeysP2) | read_pad(1));
