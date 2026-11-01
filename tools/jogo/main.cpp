@@ -9,6 +9,7 @@
 
 #include <raylib.h>
 #include <raymath.h>
+#include <rlgl.h>
 #include <cctype>
 #include <cmath>
 #include <cstdlib>
@@ -614,18 +615,44 @@ in vec3 fragPos; in vec2 fragTexCoord; in vec4 fragColor; in vec3 fragNormal;
 uniform sampler2D texture0; uniform vec4 colDiffuse; uniform sampler2D emissionMap;
 uniform vec3 lightDir; uniform vec3 lightColor; uniform vec3 ambient; uniform vec3 viewPos;
 uniform vec3 fogColor; uniform float fogNear; uniform float fogFar;
+uniform float rimStrength; uniform vec3 shadowTint;
 out vec4 finalColor;
 void main() {
   vec4 base = texture(texture0, fragTexCoord) * colDiffuse * fragColor;
   if (base.a < 0.4) discard;
   vec3 n = normalize(fragNormal);
-  float d = max(dot(n, -normalize(lightDir)), 0.0);
+  float ndl = dot(n, -normalize(lightDir));
+  // Luz estilizada (pintada): duas faixas suaves em vez do degradê contínuo, sombra puxada
+  // para um tom frio em vez de cinza, como ilustração.
+  float lit = smoothstep(-0.05, 0.12, ndl) * 0.7 + smoothstep(0.40, 0.70, ndl) * 0.3;
+  vec3 shade = mix(ambient * shadowTint, ambient + lightColor, lit);
   vec3 v = normalize(viewPos - fragPos);
-  float rim = pow(1.0 - max(dot(n, v), 0.0), 3.0) * 0.35;
-  vec3 c = base.rgb * (ambient + lightColor * d) + lightColor * rim * 0.5;
+  float rim = smoothstep(0.58, 0.78, 1.0 - max(dot(n, v), 0.0)) * (0.35 + 0.65 * lit) * rimStrength;
+  vec3 c = base.rgb * shade + lightColor * rim * 0.28;
   c += texture(emissionMap, fragTexCoord).rgb * 0.45;  // brilho próprio (brasa das luvas do Otto)
   float f = clamp((length(viewPos - fragPos) - fogNear) / (fogFar - fogNear), 0.0, 1.0);
   finalColor = vec4(mix(c, fogColor, f * 0.6), base.a);
+})";
+
+// Contorno dos personagens (casco invertido): a malha é desenhada de novo, inflada ao longo da
+// normal e só com as faces de trás, numa cor escura tirada da própria textura.
+const char* kOutlineVS = R"(#version 330
+in vec3 vertexPosition; in vec2 vertexTexCoord; in vec3 vertexNormal;
+uniform mat4 mvp; uniform float outlineWidth;
+out vec2 fragTexCoord;
+void main() {
+  fragTexCoord = vertexTexCoord;
+  gl_Position = mvp * vec4(vertexPosition + normalize(vertexNormal) * outlineWidth, 1.0);
+})";
+
+const char* kOutlineFS = R"(#version 330
+in vec2 fragTexCoord;
+uniform sampler2D texture0; uniform vec4 colDiffuse;
+out vec4 finalColor;
+void main() {
+  vec4 base = texture(texture0, fragTexCoord) * colDiffuse;
+  if (base.a < 0.4) discard;
+  finalColor = vec4(base.rgb * 0.16 + vec3(0.015, 0.012, 0.02), 1.0);
 })";
 
 struct Fighter3D {
@@ -639,6 +666,8 @@ struct Fighter3D {
   // estado de reprodução (somente apresentação)
   std::string current_key;
   int local_frame = 0;
+  float loco_phase = 0.0f;                        // quadro fracionário da locomoção (sincronizada)
+  std::vector<std::pair<int, float>> clip_speed;  // velocidade natural dos pés por clipe (cache)
   // transição suave entre clipes (mistura de poses por alguns quadros)
   std::vector<Transform> last_pose, from_pose, mix_buf;
   Transform* mix_ptr = nullptr;
@@ -663,6 +692,30 @@ struct Fighter3D {
     return nullptr;
   }
 };
+
+// Velocidade com que o pé de apoio desliza para trás no clipe (unidades do modelo por quadro),
+// entre os quadros [first, last]. É a velocidade com que o corpo andaria; serve para tocar a
+// caminhada no ritmo do deslocamento real do núcleo e os pés não patinarem no chão.
+float clip_ground_speed(const ModelAnimation& a, int first, int last) {
+  std::vector<int> feet;
+  for (int b = 0; b < a.boneCount; ++b) {
+    std::string n = a.bones[b].name;
+    std::transform(n.begin(), n.end(), n.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    if (n.find("foot") != std::string::npos && n.find("ik") == std::string::npos) feet.push_back(b);
+  }
+  if (feet.empty() || last - first < 2) return 0.0f;
+  float dist = 0.0f;
+  int steps = 0;
+  for (int f = first + 1; f <= last; ++f) {
+    int low = feet[0];
+    for (int b : feet)
+      if (a.framePoses[f][b].translation.y < a.framePoses[f][low].translation.y) low = b;
+    const Vector3 p0 = a.framePoses[f - 1][low].translation, p1 = a.framePoses[f][low].translation;
+    dist += std::sqrt((p1.x - p0.x) * (p1.x - p0.x) + (p1.z - p0.z) * (p1.z - p0.z));
+    ++steps;
+  }
+  return steps > 0 ? dist / static_cast<float>(steps) : 0.0f;
+}
 
 // O núcleo decide a posição: remove o deslocamento horizontal da pelve ao longo do clipe
 // (root motion das capturas), mantendo a altura e a rotação.
@@ -784,6 +837,24 @@ void animate(Fighter3D& g, const App& a, int p) {
     const int startup = std::max(1, static_cast<int>(m->startup));
     if (mf <= startup) frame = startup <= 1 ? contact : (mf - 1) * contact / (startup - 1);
     else frame = contact + (mf - startup) * (n - 1 - contact) / std::max(1, total - startup);
+  } else if (key == "walk_forward" || key == "walk_back" || key == "run") {
+    // Locomoção sincronizada: o clipe avança na proporção entre a velocidade real do lutador
+    // e a velocidade natural dos pés no clipe (sem patinar, nem andar "na esteira").
+    float natural = -1.0f;
+    for (const auto& [idx, sp] : g.clip_speed)
+      if (idx == ai) natural = sp;
+    if (natural < 0.0f) {
+      natural = clip_ground_speed(anim, first, last);
+      g.clip_speed.emplace_back(ai, natural);
+    }
+    const fg::CharacterDef& ch = a.data.characters[static_cast<size_t>(f.character)];
+    const fg::i32 speed = key == "run" ? ch.run_speed : (key == "walk_back" ? ch.walk_back : ch.walk_forward);
+    const float world = static_cast<float>(speed) / static_cast<float>(fg::kUnitsPerMeter);  // m/quadro
+    float rate = natural > 1e-5f ? world / (natural * g.look.scale) : 1.0f;
+    rate = std::clamp(rate, 0.4f, 2.5f);
+    if (changed) g.loco_phase = 0.0f;
+    else if (time_runs) g.loco_phase = std::fmod(g.loco_phase + rate, static_cast<float>(n));
+    frame = static_cast<int>(g.loco_phase) % n;
   } else if (ref->loop || loops(key)) {
     frame = g.local_frame % n;
   } else {
@@ -1138,6 +1209,10 @@ int main(int argc, char** argv) {
   lit.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(lit, "matModel");
   lit.locs[SHADER_LOC_MATRIX_NORMAL] = GetShaderLocation(lit, "matNormal");
   lit.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(lit, "emissionMap");
+  const int loc_rim = GetShaderLocation(lit, "rimStrength");
+  const int loc_stint = GetShaderLocation(lit, "shadowTint");
+  Shader outline = LoadShaderFromMemory(kOutlineVS, kOutlineFS);
+  const int loc_owidth = GetShaderLocation(outline, "outlineWidth");
 
   Fighter3D fighters[2];
   ArenaLook arena_look;
@@ -1320,6 +1395,8 @@ int main(int argc, char** argv) {
     SetShaderValue(lit, loc_fog, fogc, SHADER_UNIFORM_VEC3);
     SetShaderValue(lit, loc_fnear, &fnear, SHADER_UNIFORM_FLOAT);
     SetShaderValue(lit, loc_ffar, &ffar, SHADER_UNIFORM_FLOAT);
+    const float stint[3] = {0.78f, 0.80f, 1.05f};  // sombra levemente fria
+    SetShaderValue(lit, loc_stint, stint, SHADER_UNIFORM_VEC3);
 
     View v{static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())};
     BeginDrawing();
@@ -1333,7 +1410,10 @@ int main(int argc, char** argv) {
       DrawTexturePro(sky_tex, {src_x, th * 0.5f - src_h * 0.62f, view_w, src_h}, {0, 0, v.w, v.h}, {0, 0}, 0, WHITE);
     }
     BeginMode3D(cam);
+    float rim_off = 0.0f, rim_on = 1.0f;
+    SetShaderValue(lit, loc_rim, &rim_off, SHADER_UNIFORM_FLOAT);
     if (arena_loaded) DrawModel(arena, arena_look.offset, arena_look.scale, WHITE);
+    SetShaderValue(lit, loc_rim, &rim_on, SHADER_UNIFORM_FLOAT);
     for (int p = 0; p < 2; ++p) {
       const FighterState& f = app.state.f[p];
       const Vector3 pos = {static_cast<float>(f.x) * u, static_cast<float>(f.y) * u, 0.0f};
@@ -1344,6 +1424,15 @@ int main(int argc, char** argv) {
       Color tint = g.look.tint;
       if (app.setup.character[0] == app.setup.character[1] && p == 1) tint = {205, 215, 255, 255};
       DrawModelEx(g.model, pos, {0, 1, 0}, yaw, {g.look.scale, g.look.scale, g.look.scale}, tint);
+      if (outline.id != 0) {
+        const float width = 0.006f / std::max(0.01f, g.look.scale);  // ~6 mm no mundo
+        SetShaderValue(outline, loc_owidth, &width, SHADER_UNIFORM_FLOAT);
+        for (int i = 0; i < g.model.materialCount; ++i) g.model.materials[i].shader = outline;
+        rlSetCullFace(RL_CULL_FACE_FRONT);
+        DrawModelEx(g.model, pos, {0, 1, 0}, yaw, {g.look.scale, g.look.scale, g.look.scale}, tint);
+        rlSetCullFace(RL_CULL_FACE_BACK);
+        for (int i = 0; i < g.model.materialCount; ++i) g.model.materials[i].shader = lit;
+      }
     }
     if (spark_tex.id != 0) {
       BeginBlendMode(BLEND_ADDITIVE);
@@ -1392,6 +1481,7 @@ int main(int argc, char** argv) {
   if (spark_tex.id != 0) UnloadTexture(spark_tex);
   if (block_tex.id != 0 && block_tex.id != spark_tex.id) UnloadTexture(block_tex);
   UnloadShader(lit);
+  UnloadShader(outline);
   if (g_font_loaded) UnloadFont(g_font);
   CloseWindow();
   return art_missing.empty() ? 0 : 2;
