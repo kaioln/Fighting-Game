@@ -192,6 +192,21 @@ TEST("combo: escala de dano e inicio leve") {
   CHECK_EQ(s.f[1].combo_hits, 2);
 }
 
+TEST("combo: chain bufferizado no hitstop mantém a postura do aperto") {
+  // 5LP acerta; durante o hitstop o jogador aperta 2LP e solta o baixo antes do fim do hitstop.
+  // O chain precisa sair como 2LP (direção do frame do aperto), não 5LP.
+  const GameData& d = fgtest::game_data();
+  MatchState s = fight("nadja", "otto");
+  place(s, 5000);
+  CHECK(until_contact(s, btn::LP, raw_dir(5), 10) == EventType::Hit);
+  run(s, 1, raw_dir(2) | btn::LP, 0);
+  run(s, 1, raw_dir(5), 0);
+  for (int i = 0; i < 20 && s.f[0].move_frame != 1; ++i) run(s, 1, raw_dir(5), 0);
+  const MoveDef* m = current_move(s, d, 0);
+  CHECK(m != nullptr);
+  if (m) CHECK(m->id == "2LP");
+}
+
 TEST("combo: nenhuma repetição de golpe vira infinito, nem no canto") {
   // Para cada golpe normal, o atacante aperta o botão a cada 2 frames por 10 s contra o boneco.
   // O defensor precisa voltar a agir e o combo não pode exceder o teto de dano.

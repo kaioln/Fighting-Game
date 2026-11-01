@@ -50,7 +50,7 @@
       "notes": "Cabeçada com armadura de 1 golpe durante a preparação.",
       "animation": "otto/5HP_cabecada_blindada", "sfx": "impact_heavy_head", "vfx": "spark_heavy",
       "hits": [ { "frames": [13, 16], "damage": 1200, "hitstun": 24, "blockstun": 18, "hitstop": 14,
-                  "pushback_hit": 3800, "pushback_block": 4600 } ],
+                  "pushback_hit": 3200, "pushback_block": 4600 } ],
       "boxes": [ { "frames": [13, 16], "kind": "hit", "box": [1500, 12000, 4500, 4500] } ],
       "armor": [ { "frames": [5, 12], "hits": 1 } ],
       "velocity": [ { "frames": [6, 12], "vx": 250 } ],

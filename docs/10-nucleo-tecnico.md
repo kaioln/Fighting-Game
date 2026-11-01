@@ -15,6 +15,7 @@ cmake --build build -j
 ctest --test-dir build --output-on-failure      # 70 testes
 ./build/tools/fgsim/fgsim validate data          # valida os dados dos personagens
 ./build/tools/fgsim/fgsim framedata data         # tabela de frame data (seção 8)
+./build/tools/fgsim/fgsim combos data            # rotas de combo testadas com inputs reais (seção 10)
 ./build/tools/fgsim/fgsim synctest data 7200 8 3 # rollback: 2 minutos, volta 8 frames
 ./build/tools/fgsim/fgsim checksum data 7200 9   # checksum final de uma partida aleatória
 ./build/tools/fgsim/fgsim record data a.fgr 3600 5 && ./build/tools/fgsim/fgsim verify data a.fgr
@@ -225,7 +226,7 @@ Gerada com `fgsim framedata data` (valores medidos por simulação contra o outr
 | contracorrente | 4 | 3 | 24 | 30 | 0 | -8 | -8 | `---###........................` |  |
 
 
-## 9. Testes (70, todos passando)
+## 9. Testes (71, todos passando)
 
 Lista gerada pela própria execução de `fgcore_tests`:
 
@@ -319,6 +320,25 @@ place 12000     # distância inicial entre os lutadores
 A saída mostra, frame a frame, o estado de cada lutador, o frame do golpe, o hitstop e os eventos.
 O exemplo `tools/traces/punish_counter.txt` confirma uma rota real: o 2HK do Otto erra,
 a Nadja pune com 2MK na perna estendida (PUNISH 720, Maré +200) e cancela em 236K (HIT 900, queda).
+
+### Verificador de combos (`fgsim combos`)
+
+Para cada personagem, encostado no outro, o simulador testa com inputs reais (o movimento é
+digitado direção a direção, como um jogador faz): cada normal cancelado em cada especial e
+super, cada link normal → normal apertado no primeiro frame livre, e cada chain. O relatório diz
+se o segundo golpe combou, se saiu lento (o defensor já tinha se recuperado) ou se errou, e
+compara os links com o que o frame data promete; uma divergência faz o comando falhar na CI.
+
+Na primeira rodada ele achou dois problemas, ambos corrigidos:
+
+- **Chain bufferizado perdia a postura:** apertar 2LP durante o hitstop de um 5LP e soltar o
+  baixo antes do fim do hitstop saía 5LP. A postura agora vem da direção do frame do aperto
+  (teste "combo: chain bufferizado no hitstop mantém a postura do aperto").
+- **5HP do Otto → 623P errava sempre:** o empurrão de 3800 jogava a Nadja para fora do alcance
+  do cotovelo. Reduzido para 3200; 5HP agora cancela em todos os especiais e no super.
+
+O que não comba é deliberado: a Meia-Lua da Nadja (overhead de 20 frames) e a Solda e a Âncora
+do Otto (14 e 16 frames) só combam a partir de normais médios e fortes.
 
 ## 11. Limitações honestas
 

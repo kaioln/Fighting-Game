@@ -3,6 +3,7 @@
 //
 //   fgsim validate  <data>
 //   fgsim framedata <data> [personagem]            tabela Markdown medida por simulação
+//   fgsim combos    <data>                          rotas de combo (cancel, link, chain) por simulação
 //   fgsim synctest  <data> [frames] [distância] [seed]
 //   fgsim checksum  <data> [frames] [seed]          checksum final de uma partida aleatória
 //   fgsim record    <data> <arquivo.fgr> [frames] [seed]
@@ -20,6 +21,7 @@
 #include <sstream>
 #include <string>
 
+#include "combos.h"
 #include "fg/analyzer.h"
 #include "fg/loader.h"
 #include "fg/replay.h"
@@ -33,7 +35,7 @@ namespace {
 
 int usage() {
   std::fprintf(stderr,
-               "uso: fgsim <validate|framedata|synctest|checksum|record|verify|trace> <data> [args]\n"
+               "uso: fgsim <validate|framedata|combos|synctest|checksum|record|verify|trace> <data> [args]\n"
                "veja o cabeçalho de tools/fgsim/main.cpp\n");
   return 2;
 }
@@ -259,6 +261,7 @@ int main(int argc, char** argv) {
     for (const auto& ch : d.characters) std::printf("  %s: %zu golpes, %zu comandos\n", ch.id.c_str(), ch.moves.size(), ch.commands.size());
     return 0;
   }
+  if (cmd == "combos") return report_combos(d);
   if (cmd == "framedata") return cmd_framedata(d, argc > 3 ? argv[3] : "");
   if (cmd == "synctest") {
     const int frames = argc > 3 ? std::atoi(argv[3]) : 3600;

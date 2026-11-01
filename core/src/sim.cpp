@@ -154,13 +154,16 @@ bool find_normal(const CharacterDef& ch, const FighterState& f, int stance, i32 
     if (f.input.head - ua <= f.consumed_press) break;
     const u16 pressed = f.input.pressed_at(ua);
     if ((pressed & (btn::Punches | btn::Kicks)) == 0) continue;
+    // No chão, a postura (em pé/agachado) vem da direção do frame em que o botão foi apertado:
+    // um 2LP bufferizado durante o hitstop continua sendo 2LP mesmo que o jogador solte o baixo.
+    const int st = stance == 2 ? 2 : (dir_is_down(f.input.dir_at(ua)) ? 1 : 0);
     i16 idx = -1;
-    if (f.scheme == ControlScheme::Simplified && ch.simplified_normals[stance][0] >= 0) {
+    if (f.scheme == ControlScheme::Simplified && ch.simplified_normals[st][0] >= 0) {
       const int sl = simplified_slot(pressed);
-      if (sl >= 0) idx = ch.simplified_normals[stance][sl];
+      if (sl >= 0) idx = ch.simplified_normals[st][sl];
     } else {
       const int sl = button_slot(pressed);
-      if (sl >= 0) idx = ch.normals[stance][sl];
+      if (sl >= 0) idx = ch.normals[st][sl];
     }
     if (idx < 0) continue;
     if (only != nullptr) {

@@ -37,6 +37,7 @@ jobs:
           [ -f build/tools/fgsim/${{ matrix.config }}/fgsim.exe ] && BIN=build/tools/fgsim/${{ matrix.config }}/fgsim.exe
           "$BIN" validate data
           "$BIN" synctest data 7200 8 3
+          "$BIN" combos data > combos.md
 
       - name: Checksum de determinismo
         shell: bash
