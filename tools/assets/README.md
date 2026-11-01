@@ -21,3 +21,9 @@ Apresentação (quadros de contato a 60 quadros/s, como a raylib amostra o glTF)
 blender -b --factory-startup --python contact_frames.py -- contacts.json <pasta_previas> <repo>/assets/animations/ual.glb <repo>/assets/animations/kicks.glb
 python apply_contacts.py contacts.json <repo>/data/presentation/nadja.json <repo>/data/presentation/otto.json
 ```
+
+Roupas de Nadja e Otto (cascas do corpo base pintadas com paleta chapada, a partir de `docs/arte/fichas`):
+
+```bash
+blender -b --factory-startup --python build_outfits.py -- <pasta_dos_pacotes> <repo>/assets <pasta_previas>
+```

@@ -1,7 +1,7 @@
 // Apresentação: liga estados e golpes do núcleo a clipes de animação (60 quadros/s).
 // contact = quadro do clipe que coincide com o primeiro frame ativo do golpe. Gerado e ajustado à mão.
 {
-  "model": "characters/nadja_base.glb",
+  "model": "characters/nadja.glb",
   "animations": [
     "animations/ual.glb",
     "animations/kicks.glb"
@@ -186,10 +186,16 @@
       "to": 75
     },
     "623P": {
-      "clip": "NinjaJump_Start"
+      "clip": "Melee_Hook",
+      "from": 5,
+      "contact": 18,
+      "to": 28
     },
     "623PP": {
-      "clip": "NinjaJump_Start"
+      "clip": "Melee_Hook",
+      "from": 5,
+      "contact": 18,
+      "to": 28
     },
     "236236K": {
       "clip": "CMU_JumpSpinKick_87_01",
