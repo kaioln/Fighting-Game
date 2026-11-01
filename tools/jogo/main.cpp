@@ -8,6 +8,7 @@
 // Feito com raylib (zlib) para ser pequeno e leve: roda em GPUs integradas.
 
 #include <raylib.h>
+#include <raymath.h>
 #include <cctype>
 #include <cmath>
 #include <cstdlib>
@@ -344,6 +345,15 @@ struct App {
   int combo_hits[2] = {0, 0};
   int combo_damage[2] = {0, 0};
   int banner_ttl = 0;
+  // impacto (somente apresentação)
+  int shake = 0, shake_len = 1;
+  float shake_amp = 0.0f;
+  struct Spark {
+    float x, y;
+    int ttl, len;
+    bool block, strong;
+  };
+  std::vector<Spark> sparks;
   std::string banner;
   Color banner_color = kText;
 
@@ -394,6 +404,15 @@ struct App {
         adv.attacker = p;
         adv.start = static_cast<int>(state.frame);
         adv.label = e.type == E::Block ? "no bloqueio" : "no acerto";
+      }
+      if (e.type == E::Hit || e.type == E::CounterHit || e.type == E::PunishCounter || e.type == E::Block ||
+          e.type == E::Armor) {
+        const bool block = e.type == E::Block;
+        const bool strong = e.type == E::CounterHit || e.type == E::PunishCounter || e.value >= 900;
+        const float u = 1.0f / static_cast<float>(fg::kUnitsPerMeter);
+        sparks.push_back({static_cast<float>(e.x) * u, static_cast<float>(e.y) * u, 0, strong ? 14 : 10, block, strong});
+        shake_len = shake = block ? 4 : (strong ? 12 : 7);
+        shake_amp = block ? 0.012f : (strong ? 0.05f : 0.025f);
       }
       if (e.type == E::CounterHit) show_banner("COUNTER", kHealth);
       if (e.type == E::PunishCounter) show_banner("PUNISH COUNTER", kHit);
@@ -450,6 +469,9 @@ struct App {
       }
     }
 
+    for (auto& sp : sparks) ++sp.ttl;
+    sparks.erase(std::remove_if(sparks.begin(), sparks.end(), [](const Spark& sp) { return sp.ttl >= sp.len; }), sparks.end());
+    if (shake > 0) --shake;
     for (auto& f : feed) --f.ttl;
     while (!feed.empty() && feed.back().ttl <= 0) feed.pop_back();
     if (banner_ttl > 0 && banner_ttl < 100000) --banner_ttl;
@@ -616,6 +638,11 @@ struct Fighter3D {
   // estado de reprodução (somente apresentação)
   std::string current_key;
   int local_frame = 0;
+  // transição suave entre clipes (mistura de poses por alguns quadros)
+  std::vector<Transform> last_pose, from_pose, mix_buf;
+  Transform* mix_ptr = nullptr;
+  ModelAnimation mix{};
+  int blend_t = 0, blend_len = 0;
 
   int find_anim(const std::string& name) const {
     for (size_t i = 0; i < all.size(); ++i)
@@ -732,10 +759,12 @@ void animate(Fighter3D& g, const App& a, int p) {
     }
     if (!ref) ref = g.clip_for(g.look.states, "idle");
   }
-  if (key != g.current_key) {
+  const bool changed = key != g.current_key;
+  const bool time_runs = f.hitstop == 0 && a.state.freeze == 0;
+  if (changed) {
     g.current_key = key;
     g.local_frame = 0;
-  } else if (f.hitstop == 0 && a.state.freeze == 0) {
+  } else if (time_runs) {
     ++g.local_frame;
   }
   if (!ref) return;
@@ -760,7 +789,42 @@ void animate(Fighter3D& g, const App& a, int p) {
     frame = std::min(g.local_frame, n - 1);
   }
   if (ref->reverse) frame = n - 1 - frame;
-  UpdateModelAnimation(g.model, anim, first + frame);
+
+  // Mistura com a pose anterior nos primeiros quadros de um clipe novo: golpes trocam rápido
+  // (leitura imediata), reações ainda mais rápido, locomoção com mais suavidade.
+  const int bc = anim.boneCount;
+  const Transform* target = anim.framePoses[first + frame];
+  if (static_cast<int>(g.last_pose.size()) != bc) g.last_pose.assign(target, target + bc);
+  if (changed) {
+    g.from_pose = g.last_pose;
+    g.blend_t = 0;
+    if (key.rfind("move:", 0) == 0) g.blend_len = 3;
+    else if (key.rfind("hit", 0) == 0 || key.rfind("block", 0) == 0 || key == "juggle" || key == "thrown") g.blend_len = 2;
+    else g.blend_len = 6;
+  }
+  g.mix_buf.resize(static_cast<size_t>(bc));
+  if (g.blend_t < g.blend_len && static_cast<int>(g.from_pose.size()) == bc) {
+    const float t = static_cast<float>(g.blend_t + 1) / static_cast<float>(g.blend_len + 1);
+    const float k = t * t * (3.0f - 2.0f * t);  // suavização
+    for (int b = 0; b < bc; ++b) {
+      const Transform& A = g.from_pose[static_cast<size_t>(b)];
+      const Transform& B = target[b];
+      Transform& O = g.mix_buf[static_cast<size_t>(b)];
+      O.translation = Vector3Lerp(A.translation, B.translation, k);
+      O.rotation = QuaternionSlerp(A.rotation, B.rotation, k);
+      O.scale = Vector3Lerp(A.scale, B.scale, k);
+    }
+    if (time_runs) ++g.blend_t;
+  } else {
+    std::copy(target, target + bc, g.mix_buf.begin());
+  }
+  g.last_pose = g.mix_buf;
+  g.mix_ptr = g.mix_buf.data();
+  g.mix.boneCount = bc;
+  g.mix.bones = anim.bones;
+  g.mix.frameCount = 1;
+  g.mix.framePoses = &g.mix_ptr;
+  UpdateModelAnimation(g.model, g.mix, 0);
 }
 
 void draw_bar(float x, float y, float w, float h, float frac, Color fg_c, Color bg_c, bool from_right) {
@@ -1140,6 +1204,14 @@ int main(int argc, char** argv) {
   // Sombra suave sob cada lutador (textura radial, não geometria).
   Image shadow_img = GenImageGradientRadial(128, 128, 0.0f, {0, 0, 0, 150}, {0, 0, 0, 0});
   Texture2D shadow_tex = LoadTextureFromImage(shadow_img);
+  // Efeitos de impacto: texturas de assets/vfx (pacote CC0). Sem o arquivo, só o tremor de câmera.
+  Texture2D spark_tex{}, block_tex{};
+  {
+    const std::string sp = join_path(assets_dir, "vfx/impact.png"), bp = join_path(assets_dir, "vfx/block.png");
+    if (FileExists(sp.c_str())) spark_tex = LoadTexture(sp.c_str());
+    if (FileExists(bp.c_str())) block_tex = LoadTexture(bp.c_str());
+    else block_tex = spark_tex;
+  }
   UnloadImage(shadow_img);
 
   Camera3D cam{};
@@ -1209,8 +1281,15 @@ int main(int argc, char** argv) {
     const float want_x = std::clamp((x0 + x1) / 2, -half + 2.5f, half - 2.5f);
     cam_x += (want_x - cam_x) * 0.18f;
     cam_z += (want_z - cam_z) * 0.10f;
-    cam.position = {cam_x, 1.45f, cam_z};
-    cam.target = {cam_x, 1.05f, 0.0f};
+    // tremor de impacto: decai rápido, sempre pequeno
+    float jx = 0.0f, jy = 0.0f;
+    if (app.shake > 0) {
+      const float k = app.shake_amp * static_cast<float>(app.shake) / static_cast<float>(app.shake_len);
+      jx = k * ((app.shake % 2) ? 1.0f : -1.0f);
+      jy = k * 0.5f * ((app.shake % 3) - 1);
+    }
+    cam.position = {cam_x + jx, 1.45f + jy, cam_z};
+    cam.target = {cam_x + jx, 1.05f + jy, 0.0f};
 
     const float light_dir[3] = {-0.35f, -1.0f, -0.45f};
     const float light_col[3] = {1.0f, 0.95f, 0.88f};
@@ -1250,6 +1329,17 @@ int main(int argc, char** argv) {
       if (app.setup.character[0] == app.setup.character[1] && p == 1) tint = {205, 215, 255, 255};
       DrawModelEx(g.model, pos, {0, 1, 0}, yaw, {g.look.scale, g.look.scale, g.look.scale}, tint);
     }
+    if (spark_tex.id != 0) {
+      BeginBlendMode(BLEND_ADDITIVE);
+      for (const auto& sp : app.sparks) {
+        const Texture2D& tex = sp.block ? block_tex : spark_tex;
+        const float life = static_cast<float>(sp.ttl) / static_cast<float>(sp.len);
+        const float size = (sp.strong ? 1.1f : 0.75f) * (0.6f + 0.6f * life);
+        const Color c = Fade(sp.block ? Color{150, 200, 255, 255} : Color{255, 210, 140, 255}, 1.0f - life);
+        DrawBillboard(cam, tex, {sp.x, sp.y, 0.35f}, size, c);
+      }
+      EndBlendMode();
+    }
     if (app.show_boxes)
       for (int p = 0; p < 2; ++p) draw_boxes_3d(app, p);
     EndMode3D();
@@ -1283,6 +1373,8 @@ int main(int argc, char** argv) {
   if (arena_loaded) UnloadModel(arena);
   if (sky_tex.id != 0) UnloadTexture(sky_tex);
   UnloadTexture(shadow_tex);
+  if (spark_tex.id != 0) UnloadTexture(spark_tex);
+  if (block_tex.id != 0 && block_tex.id != spark_tex.id) UnloadTexture(block_tex);
   UnloadShader(lit);
   if (g_font_loaded) UnloadFont(g_font);
   CloseWindow();
