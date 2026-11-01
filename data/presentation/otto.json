@@ -4,7 +4,8 @@
   "model": "characters/otto.glb",
   "animations": [
     "animations/ual.glb",
-    "animations/kicks.glb"
+    "animations/kicks.glb",
+    "animations/otto_golpes.glb"
   ],
   "scale_milli": 1050,
   "states": {
@@ -18,41 +19,50 @@
     "jump_start": "Jump_Start",
     "jump": "Jump_Loop",
     "land": "Jump_Land",
-    "hit": "Hit_Chest",
-    "hit_crouch": "Hit_Head",
+    "hit": {
+      "clip": "Otto_Hit"
+    },
+    "hit_crouch": {
+      "clip": "Otto_Hit"
+    },
     "block": {
-      "clip": "CMU_Boxing_13_18",
-      "from": 0,
-      "to": 10
+      "clip": "Otto_Bloqueio"
     },
     "block_crouch": {
       "clip": "Crouch_Idle_Loop",
       "to": 1
     },
     "guard": {
-      "clip": "CMU_Boxing_13_18",
-      "from": 0,
-      "to": 10
+      "clip": "Otto_Bloqueio"
     },
     "juggle": "Hit_Knockback",
-    "knockdown": "Death01",
-    "ko": "Death01",
-    "wakeup": "LayToIdle",
+    "knockdown": {
+      "clip": "Otto_Queda"
+    },
+    "ko": {
+      "clip": "Otto_Queda"
+    },
+    "wakeup": {
+      "clip": "Otto_Levanta"
+    },
     "thrown": "Hit_Knockback",
-    "throw": "OverhandThrow",
-    "tech": "Hit_Chest",
+    "throw": {
+      "clip": "Otto_Arremesso",
+      "contact": 18
+    },
+    "tech": {
+      "clip": "Otto_Hit"
+    },
     "win": "Idle_FoldArms_Loop",
     "idle": {
-      "clip": "Idle_Loop",
+      "clip": "Otto_Guarda",
       "loop": true
     }
   },
   "moves": {
     "5LP": {
-      "clip": "Punch_Jab",
-      "contact": 13,
-      "from": 4,
-      "to": 40
+      "clip": "Otto_Jab",
+      "contact": 6
     },
     "2LP": {
       "clip": "Punch_Jab",
@@ -67,10 +77,8 @@
       "to": 40
     },
     "5MP": {
-      "clip": "Punch_Cross",
-      "contact": 18,
-      "from": 8,
-      "to": 46
+      "clip": "Otto_Martelo",
+      "contact": 10
     },
     "2MP": {
       "clip": "Punch_Cross",
@@ -85,10 +93,8 @@
       "to": 46
     },
     "5HP": {
-      "clip": "Melee_Hook",
-      "contact": 18,
-      "from": 5,
-      "to": 28
+      "clip": "Otto_Cabecada",
+      "contact": 9
     },
     "2HP": {
       "clip": "Melee_Hook",
@@ -163,16 +169,12 @@
       "to": 139
     },
     "360P": {
-      "clip": "OverhandThrow",
-      "from": 0,
-      "contact": 23,
-      "to": 50
+      "clip": "Otto_Agarrao",
+      "contact": 8
     },
     "360PP": {
-      "clip": "OverhandThrow",
-      "from": 0,
-      "contact": 23,
-      "to": 50
+      "clip": "Otto_Agarrao",
+      "contact": 8
     },
     "236P": {
       "clip": "Shield_Dash",
@@ -193,10 +195,8 @@
       "to": 40
     },
     "623P": {
-      "clip": "Melee_Hook",
-      "from": 5,
-      "contact": 18,
-      "to": 28
+      "clip": "Otto_Upper",
+      "contact": 7
     },
     "236236P": {
       "clip": "Sword_Heavy_Combo",
@@ -205,16 +205,12 @@
       "to": 200
     },
     "throw_f": {
-      "clip": "OverhandThrow",
-      "from": 0,
-      "contact": 23,
-      "to": 50
+      "clip": "Otto_Arremesso",
+      "contact": 18
     },
     "throw_b": {
-      "clip": "OverhandThrow",
-      "from": 0,
-      "contact": 23,
-      "to": 50
+      "clip": "Otto_Arremesso",
+      "contact": 18
     },
     "dash": {
       "clip": "Jog_Fwd_Loop"

@@ -15,33 +15,50 @@
       "reverse": true,
       "loop": true
     },
-    "crouch": "Crouch_Idle_Loop",
-    "jump_start": "Jump_Start",
-    "jump": "Jump_Loop",
-    "land": "Jump_Land",
-    "hit": "Hit_Chest",
-    "hit_crouch": "Hit_Head",
+    "crouch": {
+      "clip": "Nadja_Agachada",
+      "loop": true
+    },
+    "jump_start": {
+      "clip": "Nadja_PuloInicio"
+    },
+    "jump": {
+      "clip": "Nadja_PuloAr",
+      "loop": true
+    },
+    "land": {
+      "clip": "Nadja_Aterrissa"
+    },
+    "hit": {
+      "clip": "Nadja_Hit"
+    },
+    "hit_crouch": {
+      "clip": "Nadja_Hit"
+    },
     "block": {
-      "clip": "CMU_Boxing_13_18",
-      "from": 0,
-      "to": 10
+      "clip": "Nadja_Bloqueio"
     },
     "block_crouch": {
-      "clip": "Crouch_Idle_Loop",
-      "to": 1
+      "clip": "Nadja_AgBloqueio"
     },
     "guard": {
-      "clip": "CMU_Boxing_13_18",
-      "from": 0,
-      "to": 10
+      "clip": "Nadja_Bloqueio"
     },
     "juggle": "Hit_Knockback",
-    "knockdown": "Death01",
-    "ko": "Death01",
-    "wakeup": "LayToIdle",
+    "knockdown": {
+      "clip": "Nadja_Queda"
+    },
+    "ko": {
+      "clip": "Nadja_Queda"
+    },
+    "wakeup": {
+      "clip": "Nadja_Levanta"
+    },
     "thrown": "Hit_Knockback",
     "throw": "OverhandThrow",
-    "tech": "Hit_Chest",
+    "tech": {
+      "clip": "Nadja_Hit"
+    },
     "win": "Idle_FoldArms_Loop",
     "idle": {
       "clip": "Nadja_Guarda",
@@ -55,108 +72,76 @@
       "contact": 4
     },
     "2LP": {
-      "clip": "Punch_Jab",
-      "contact": 13,
-      "from": 4,
-      "to": 40
+      "clip": "Nadja_AgSocoLeve",
+      "contact": 4
     },
     "j.LP": {
-      "clip": "Punch_Jab",
-      "contact": 13,
-      "from": 4,
-      "to": 40
+      "clip": "Nadja_AereoSoco",
+      "contact": 5
     },
     "5MP": {
       "clip": "Nadja_Direto",
       "contact": 7
     },
     "2MP": {
-      "clip": "Punch_Cross",
-      "contact": 18,
-      "from": 8,
-      "to": 46
+      "clip": "Nadja_AgSocoMedio",
+      "contact": 7
     },
     "j.MP": {
-      "clip": "Punch_Cross",
-      "contact": 18,
-      "from": 8,
-      "to": 46
+      "clip": "Nadja_AereoSoco",
+      "contact": 5
     },
     "5HP": {
-      "clip": "Melee_Hook",
-      "contact": 18,
-      "from": 5,
-      "to": 28
+      "clip": "Nadja_Gancho",
+      "contact": 9
     },
     "2HP": {
-      "clip": "Melee_Hook",
-      "contact": 18,
-      "from": 5,
-      "to": 28
+      "clip": "Nadja_Upper",
+      "contact": 8
     },
     "j.HP": {
-      "clip": "Melee_Hook",
-      "contact": 18,
-      "from": 5,
-      "to": 28
+      "clip": "Nadja_AereoSoco",
+      "contact": 5
     },
     "6MP": {
-      "clip": "Melee_Hook",
-      "contact": 18,
-      "from": 5,
-      "to": 28
+      "clip": "Nadja_Gancho",
+      "contact": 9
     },
     "5LK": {
-      "clip": "CMU_Kick_74_03",
-      "from": 80,
-      "contact": 110,
-      "to": 136
+      "clip": "Nadja_ChuteBaixo",
+      "contact": 5
     },
     "2LK": {
-      "clip": "CMU_Kick_74_03",
-      "from": 80,
-      "contact": 110,
-      "to": 136
+      "clip": "Nadja_AgChuteLeve",
+      "contact": 5
     },
     "5MK": {
       "clip": "Nadja_ChuteMedio",
       "contact": 10
     },
     "2MK": {
-      "clip": "CMU_Kick_74_05",
-      "from": 60,
-      "contact": 88,
-      "to": 118
+      "clip": "Nadja_AgChuteMedio",
+      "contact": 8
     },
     "5HK": {
-      "clip": "CMU_Kick_74_06",
-      "from": 60,
-      "contact": 86,
-      "to": 115
+      "clip": "Nadja_ChuteAlto",
+      "contact": 12
     },
     "2HK": {
-      "clip": "Slide_Start",
-      "from": 6,
-      "contact": 15,
-      "to": 40
+      "clip": "Nadja_Rasteira",
+      "contact": 10
     },
     "j.LK": {
-      "clip": "CMU_JumpKick_75_16",
-      "from": 69,
-      "contact": 102,
-      "to": 139
+      "clip": "Nadja_AereoChute",
+      "contact": 6
     },
     "j.MK": {
-      "clip": "CMU_JumpKick_75_16",
-      "from": 69,
-      "contact": 102,
-      "to": 139
+      "clip": "Nadja_AereoChute",
+      "contact": 6
     },
     "j.HK": {
-      "clip": "CMU_JumpKick_75_16",
-      "from": 69,
-      "contact": 102,
-      "to": 139
+      "clip": "Nadja_AereoChute",
+      "contact": 6
     },
     "236P": {
       "clip": "Shield_Dash",
@@ -183,16 +168,12 @@
       "to": 75
     },
     "623P": {
-      "clip": "Melee_Hook",
-      "from": 5,
-      "contact": 18,
-      "to": 28
+      "clip": "Nadja_Upper",
+      "contact": 8
     },
     "623PP": {
-      "clip": "Melee_Hook",
-      "from": 5,
-      "contact": 18,
-      "to": 28
+      "clip": "Nadja_Upper",
+      "contact": 8
     },
     "236236K": {
       "clip": "CMU_JumpSpinKick_87_01",
@@ -213,12 +194,10 @@
       "to": 50
     },
     "dash": {
-      "clip": "Jog_Fwd_Loop"
+      "clip": "Nadja_Dash"
     },
     "backdash": {
-      "clip": "Roll",
-      "reverse": true,
-      "contact": 47
+      "clip": "Nadja_Recuo"
     },
     "arrebentacao": {
       "clip": "Shield_Dash",

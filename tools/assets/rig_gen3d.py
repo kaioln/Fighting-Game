@@ -21,6 +21,9 @@ from mathutils import Matrix, Vector
 
 GEN, BODY, HAIR, OUT, HEIGHT, MAXT, PREV, NAME = sys.argv[sys.argv.index("--") + 1:]
 HEIGHT, MAXT = float(HEIGHT), int(MAXT)
+GAMMA = float(os.environ.get("FG_GAMMA", "0.8"))
+BACK_EXP = float(os.environ.get("FG_BACK_EXP", "0.55"))
+BACK_GAIN = float(os.environ.get("FG_BACK_GAIN", "1.08"))
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene
@@ -162,6 +165,24 @@ for v in gen.data.vertices:
         moved += 1
 print("LOOSE_TO_PELVIS", moved)
 
+# Otto: a frente do avental (rígida, de couro) segue o quadril; as coxas só puxam um pouco
+if NAME == "otto":
+    pinned = 0
+    for v in gen.data.vertices:
+        if not (B["calf_l"].z - 0.10 < v.co.z < B["thigh_l"].z + 0.05 and abs(v.co.x) < 0.30
+                and v.co.y < B["pelvis"].y - 0.06):
+            continue
+        loc, nrm, idx, dist = tree.find_nearest(v.co)
+        if dist is None or dist < 0.02:
+            continue
+        side = "thigh_l" if v.co.x > 0 else "thigh_r"
+        for g in list(v.groups):
+            gen.vertex_groups[g.group].remove([v.index])
+        pel.add([v.index], 0.8, "REPLACE")
+        gen.vertex_groups[side].add([v.index], 0.2, "REPLACE")
+        pinned += 1
+    print("APRON_PINNED", pinned)
+
 # 5. pose A -> T-pose de repouso: armadura auxiliar com repouso = pose A, posada de volta em T
 fit = arm.copy()
 fit.data = arm.data.copy()
@@ -237,6 +258,38 @@ bpy.context.view_layer.objects.active = gen
 bpy.ops.object.vertex_group_limit_total(group_select_mode="ALL", limit=4)
 bpy.ops.object.vertex_group_normalize_all(group_select_mode="ALL", lock_active=False)
 
+# 6a. costas escuras: o gerador só via a frente; marca no UV os triângulos virados para trás (+Y)
+back_mask = None
+uvl = gen.data.uv_layers.active
+img0 = next((im for im in bpy.data.images if im.size[0] > 0), None)
+if uvl is not None and img0 is not None:
+    W, H = img0.size
+    if max(W, H) > 2048:
+        W = H = 2048
+    back_mask = np.zeros((H, W), dtype=np.float32)
+    gen.data.calc_loop_triangles()
+    for tri in gen.data.loop_triangles:
+        ny = tri.normal.y
+        if ny < 0.15:
+            continue
+        uvs = np.array([uvl.data[li].uv[:] for li in tri.loops]) * [W - 1, H - 1]
+        x0, y0 = np.floor(uvs.min(axis=0)).astype(int)
+        x1, y1 = np.ceil(uvs.max(axis=0)).astype(int)
+        if x1 - x0 > 200 or y1 - y0 > 200:
+            continue
+        xs, ys = np.meshgrid(np.arange(x0, x1 + 1), np.arange(y0, y1 + 1))
+        a, b, c = uvs
+        d = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1])
+        if abs(d) < 1e-9:
+            continue
+        l1 = ((b[1] - c[1]) * (xs - c[0]) + (c[0] - b[0]) * (ys - c[1])) / d
+        l2 = ((c[1] - a[1]) * (xs - c[0]) + (a[0] - c[0]) * (ys - c[1])) / d
+        inside = (l1 >= -0.02) & (l2 >= -0.02) & (1 - l1 - l2 >= -0.02)
+        xs, ys = xs[inside], ys[inside]
+        ok = (xs >= 0) & (xs < W) & (ys >= 0) & (ys < H)
+        back_mask[ys[ok], xs[ok]] = np.maximum(back_mask[ys[ok], xs[ok]], min(1.0, ny * 1.4))
+    print("BACK_MASK_TEXELS", int((back_mask > 0).sum()))
+
 # 6. textura: níveis (clareia sombras embutidas), até 2K
 for im in bpy.data.images:
     if im.size[0] == 0:
@@ -246,7 +299,10 @@ for im in bpy.data.images:
     px = np.array(im.pixels[:], dtype=np.float32).reshape(-1, 4)
     rgb = px[:, :3]
     lo, hi = np.percentile(rgb, 1), np.percentile(rgb, 99.5)
-    rgb = np.clip((rgb - lo) / max(hi - lo, 1e-3), 0, 1) ** 0.8  # estica e levanta os médios
+    rgb = np.clip((rgb - lo) / max(hi - lo, 1e-3), 0, 1) ** GAMMA  # estica e levanta os médios
+    if back_mask is not None and back_mask.shape == (im.size[1], im.size[0]):
+        m = back_mask.reshape(-1, 1)
+        rgb = rgb * (1 - m) + (rgb ** BACK_EXP * BACK_GAIN).clip(0, 1) * m  # costas: levanta as sombras
     px[:, :3] = rgb
     im.pixels = px.ravel()
     im.update()
@@ -260,7 +316,10 @@ for mat in bpy.data.materials:
                     mat.node_tree.links.remove(l)
 
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
-bpy.ops.export_scene.gltf(filepath=OUT, export_format="GLB", export_skins=True, export_animations=False,
+bpy.ops.object.select_all(action="DESELECT")
+arm.select_set(True)
+gen.select_set(True)
+bpy.ops.export_scene.gltf(filepath=OUT, export_format="GLB", export_skins=True, export_animations=False, use_selection=True,
                           export_morph=False, export_cameras=False, export_lights=False, export_yup=True,
                           export_image_format="AUTO")
 print("EXPORTED", OUT, os.path.getsize(OUT))

@@ -193,7 +193,7 @@ place("MraIiFnpAY", 4.9, 3.6, s=1.0)
 place("MraIiFnpAY", 5.6, 3.9, rot=40, s=1.0)
 place("MraIiFnpAY", 5.2, 4.6, rot=80, s=1.0)
 place("ONdghDBByN", 3.9, 6.6, rot=10, s=0.9, remap={"Wood": wood, "DarkWood": wood})
-place("mmq7GmG1AK", -1.6, 7.2, rot=35, s=0.8)
+# (pneus removidos: material preto chapado destoava do estilo pintado)
 
 # borda do cais: postes de luz, hidrante, âncora e cais de madeira com postes de amarração
 for x in (-12.5, 12.5):
