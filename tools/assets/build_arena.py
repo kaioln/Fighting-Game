@@ -261,10 +261,23 @@ for img in bpy.data.images:
         img.scale(int(img.size[0] * f), int(img.size[1] * f))
 
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
+# a raylib 5.5 não lê JPEG por padrão: converte as texturas JPEG para PNG antes de exportar
+png_dir = os.path.join(os.path.dirname(OUT), "_png_tmp")
+os.makedirs(png_dir, exist_ok=True)
+for img in bpy.data.images:
+    if img.file_format == "JPEG" or img.filepath.lower().endswith((".jpg", ".jpeg")):
+        dst = os.path.join(png_dir, os.path.splitext(os.path.basename(img.filepath))[0] + ".png")
+        img.file_format = "PNG"
+        img.filepath_raw = dst
+        img.save()
+        img.filepath = dst
+        img.reload()
 bpy.ops.export_scene.gltf(filepath=OUT, export_format="GLB", export_yup=True, export_apply=True,
                           export_animations=False, export_skins=False, export_cameras=False,
                           export_lights=False, export_image_format="AUTO")
 print("EXPORTED", OUT, os.path.getsize(OUT))
+import shutil
+shutil.rmtree(png_dir, ignore_errors=True)
 
 # ---------- prévia: câmera glTF (0, 1.45, 7) -> (0, 1.05, 0), fovy 32 ----------
 cam_data = bpy.data.cameras.new("cam")

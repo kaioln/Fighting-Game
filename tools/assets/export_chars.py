@@ -87,12 +87,36 @@ def export(path, animations):
     print("EXPORTED", path, os.path.getsize(path))
 
 
-def character(body, out_name, hair=()):
+def tint_hair(rgb):
+    """As texturas de cabelo da Quaternius são em tons de cinza (a cor vem do shader do pacote).
+    Multiplica por uma cor constante, que o exportador glTF grava como baseColorFactor."""
+    for m in bpy.data.materials:
+        if not m.use_nodes or not any(k in m.name for k in ("Hair", "Eyebrow", "Beard")):
+            continue
+        nt = m.node_tree
+        bsdf = next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED")
+        link = next((l for l in nt.links if l.to_socket == bsdf.inputs["Base Color"]), None)
+        if link is None:
+            bsdf.inputs["Base Color"].default_value = (*rgb, 1)
+            continue
+        src = link.from_socket
+        nt.links.remove(link)
+        mix = nt.nodes.new("ShaderNodeMix")
+        mix.data_type = "RGBA"
+        mix.blend_type = "MULTIPLY"
+        mix.inputs["Factor"].default_value = 1.0
+        nt.links.new(src, mix.inputs["A"])
+        mix.inputs["B"].default_value = (*rgb, 1)
+        nt.links.new(mix.outputs["Result"], bsdf.inputs["Base Color"])
+
+
+def character(body, out_name, hair=(), hair_rgb=(0.16, 0.10, 0.07)):
     reset()
     objs = import_gltf(os.path.join(BODY, body + ".gltf"))
     arm = armature_of(objs)
     for h in hair:
         attach_hair(arm, h)
+    tint_hair(hair_rgb)
     if arm.animation_data:
         arm.animation_data_clear()
     for a in list(bpy.data.actions):
@@ -103,8 +127,8 @@ def character(body, out_name, hair=()):
 
 character("Superhero_Female_FullBody", "base_female")
 character("Superhero_Male_FullBody", "base_male")
-character("Superhero_Female_FullBody", "nadja_base", hair=("Hair_Buns", "Eyebrows_Female"))
-character("Superhero_Male_FullBody", "otto_base", hair=("Hair_Buzzed", "Hair_Beard", "Eyebrows_Regular"))
+character("Superhero_Female_FullBody", "nadja_base", hair=("Hair_Buns", "Eyebrows_Female"), hair_rgb=(0.09, 0.05, 0.04))
+character("Superhero_Male_FullBody", "otto_base", hair=("Hair_Buzzed", "Hair_Beard", "Eyebrows_Regular"), hair_rgb=(0.55, 0.53, 0.50))
 
 # Biblioteca de animações: armadura da UAL1 recebe todos os clipes (UAL1 + UAL2) como trilhas NLA.
 reset()

@@ -952,7 +952,15 @@ std::string join_path(const std::string& a, const std::string& b) {
 }
 
 void apply_shader(Model& m, Shader sh) {
-  for (int i = 0; i < m.materialCount; ++i) m.materials[i].shader = sh;
+  for (int i = 0; i < m.materialCount; ++i) {
+    m.materials[i].shader = sh;
+    // O glTF chega sem mipmaps: sem eles, texturas repetidas no chão serrilham à distância.
+    Texture2D& t = m.materials[i].maps[MATERIAL_MAP_DIFFUSE].texture;
+    if (t.id > 1 && t.mipmaps <= 1) {
+      GenTextureMipmaps(&t);
+      SetTextureFilter(t, TEXTURE_FILTER_TRILINEAR);
+    }
+  }
 }
 
 // Caixas de colisão em 3D (somente no treino, tecla F9): ferramenta de leitura sobre os modelos.
@@ -1006,7 +1014,11 @@ int main(int argc, char** argv) {
 
   SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT | FLAG_MSAA_4X_HINT);
   InitWindow(1600, 900, "Projeto Estaleiro");
-  SetTargetFPS(60);
+  // Monitor de ~60 Hz: o VSync dita o ritmo. Somar o limitador da raylib faz os dois brigarem, e no
+  // Windows 11 o Sleep perde precisão com a janela em segundo plano (caía para ~42 FPS).
+  // Em monitores de outra frequência, o limitador segura a simulação em 60 Hz.
+  const int hz = GetMonitorRefreshRate(GetCurrentMonitor());  // 59,94 Hz aparece como 59
+  SetTargetFPS(hz >= 59 && hz <= 61 ? 0 : 60);
   SetExitKey(KEY_NULL);
   load_font();
 

@@ -131,7 +131,7 @@ def build_clip(name, stem, t0, t1):
     h0 = samples[0]
     side = (h0["LeftUpLeg"].translation - h0["RightUpLeg"].translation)
     side.z = 0
-    fwd = Vector((0, 0, 1)).cross(side.normalized())  # para onde o ator olha
+    fwd = side.normalized().cross(Vector((0, 0, 1)))  # para onde o ator olha (esquerda x cima)
     yaw = math.atan2(fwd.x, -fwd.y)
     Yfix = Quaternion((0, 0, 1), -yaw)
     p0 = h0["Hips"].translation.copy()

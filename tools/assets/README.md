@@ -14,3 +14,10 @@ python glbinfo.py <arquivo.glb>...   # ossos, clipes, triângulos; confere se a 
 `<pasta_dos_pacotes>` contém os zips extraídos (Quaternius UBC/UAL1/UAL2, kits Kenney, texturas ambientCG).
 Todos os GLB de personagem e de animação usam o mesmo esqueleto de 65 ossos, na mesma ordem. É isso que a
 raylib exige para aplicar clipes de um arquivo no modelo de outro.
+
+Apresentação (quadros de contato a 60 quadros/s, como a raylib amostra o glTF):
+
+```bash
+blender -b --factory-startup --python contact_frames.py -- contacts.json <pasta_previas> <repo>/assets/animations/ual.glb <repo>/assets/animations/kicks.glb
+python apply_contacts.py contacts.json <repo>/data/presentation/nadja.json <repo>/data/presentation/otto.json
+```

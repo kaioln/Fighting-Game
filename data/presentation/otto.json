@@ -48,109 +48,188 @@
   "moves": {
     "5LP": {
       "clip": "Punch_Jab",
-      "contact": 15
+      "contact": 13,
+      "from": 4,
+      "to": 40
     },
     "2LP": {
       "clip": "Punch_Jab",
-      "contact": 15
+      "contact": 13,
+      "from": 4,
+      "to": 40
     },
     "j.LP": {
       "clip": "Punch_Jab",
-      "contact": 15
+      "contact": 13,
+      "from": 4,
+      "to": 40
     },
     "5MP": {
       "clip": "Punch_Cross",
-      "contact": 20
+      "contact": 18,
+      "from": 8,
+      "to": 46
     },
     "2MP": {
       "clip": "Punch_Cross",
-      "contact": 20
+      "contact": 18,
+      "from": 8,
+      "to": 46
     },
     "j.MP": {
       "clip": "Punch_Cross",
-      "contact": 20
+      "contact": 18,
+      "from": 8,
+      "to": 46
     },
     "5HP": {
       "clip": "Melee_Hook",
-      "contact": 14
+      "contact": 18,
+      "from": 5,
+      "to": 28
     },
     "2HP": {
       "clip": "Melee_Hook",
-      "contact": 14
+      "contact": 18,
+      "from": 5,
+      "to": 28
     },
     "j.HP": {
       "clip": "Melee_Hook",
-      "contact": 14
+      "contact": 18,
+      "from": 5,
+      "to": 28
     },
     "6HP": {
-      "clip": "Sword_Heavy_Combo"
+      "clip": "Sword_Heavy_Combo",
+      "from": 125,
+      "contact": 156,
+      "to": 200
     },
     "5LK": {
-      "clip": "CMU_Kick_74_03"
+      "clip": "CMU_Kick_74_03",
+      "from": 80,
+      "contact": 110,
+      "to": 136
     },
     "2LK": {
-      "clip": "CMU_Kick_74_03"
+      "clip": "CMU_Kick_74_03",
+      "from": 80,
+      "contact": 110,
+      "to": 136
     },
     "5MK": {
-      "clip": "CMU_Kick_74_05"
+      "clip": "CMU_Kick_74_05",
+      "from": 60,
+      "contact": 88,
+      "to": 118
     },
     "2MK": {
-      "clip": "CMU_Kick_74_05"
+      "clip": "CMU_Kick_74_05",
+      "from": 60,
+      "contact": 88,
+      "to": 118
     },
     "5HK": {
-      "clip": "CMU_Kick_74_06"
+      "clip": "CMU_Kick_74_06",
+      "from": 60,
+      "contact": 86,
+      "to": 115
     },
     "2HK": {
-      "clip": "Slide_Start"
+      "clip": "Slide_Start",
+      "from": 6,
+      "contact": 15,
+      "to": 40
     },
     "j.LK": {
-      "clip": "CMU_JumpKick_75_16"
+      "clip": "CMU_JumpKick_75_16",
+      "from": 69,
+      "contact": 102,
+      "to": 139
     },
     "j.MK": {
-      "clip": "CMU_JumpKick_75_16"
+      "clip": "CMU_JumpKick_75_16",
+      "from": 69,
+      "contact": 102,
+      "to": 139
     },
     "j.HK": {
-      "clip": "CMU_JumpKick_75_16"
+      "clip": "CMU_JumpKick_75_16",
+      "from": 69,
+      "contact": 102,
+      "to": 139
     },
     "360P": {
-      "clip": "OverhandThrow"
+      "clip": "OverhandThrow",
+      "from": 0,
+      "contact": 23,
+      "to": 50
     },
     "360PP": {
-      "clip": "OverhandThrow"
+      "clip": "OverhandThrow",
+      "from": 0,
+      "contact": 23,
+      "to": 50
     },
     "236P": {
-      "clip": "Shield_Dash"
+      "clip": "Shield_Dash",
+      "from": 0,
+      "contact": 13,
+      "to": 45
     },
     "236PP": {
-      "clip": "Shield_Dash"
+      "clip": "Shield_Dash",
+      "from": 0,
+      "contact": 13,
+      "to": 45
     },
     "214K": {
-      "clip": "Slide_Start"
+      "clip": "Slide_Start",
+      "from": 6,
+      "contact": 15,
+      "to": 40
     },
     "623P": {
       "clip": "NinjaJump_Start"
     },
     "236236P": {
-      "clip": "Sword_Heavy_Combo"
+      "clip": "Sword_Heavy_Combo",
+      "from": 125,
+      "contact": 156,
+      "to": 200
     },
     "throw_f": {
-      "clip": "OverhandThrow"
+      "clip": "OverhandThrow",
+      "from": 0,
+      "contact": 23,
+      "to": 50
     },
     "throw_b": {
-      "clip": "OverhandThrow"
+      "clip": "OverhandThrow",
+      "from": 0,
+      "contact": 23,
+      "to": 50
     },
     "dash": {
       "clip": "Jog_Fwd_Loop"
     },
     "backdash": {
       "clip": "Roll",
-      "reverse": true
+      "reverse": true,
+      "contact": 47
     },
     "arrebentacao": {
-      "clip": "Shield_Dash"
+      "clip": "Shield_Dash",
+      "from": 0,
+      "contact": 13,
+      "to": 45
     },
     "contracorrente": {
-      "clip": "Shield_OneShot"
+      "clip": "Shield_OneShot",
+      "from": 10,
+      "contact": 35,
+      "to": 50
     }
   }
 }
