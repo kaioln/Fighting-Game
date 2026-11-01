@@ -35,7 +35,7 @@ CLIPS = {
 MAP = {  # alvo: fonte
     "pelvis": "Hips",
     "spine_01": "LowerBack", "spine_02": "Spine", "spine_03": "Spine1",
-    "neck_01": "Neck", "Head": "Head",
+    "neck_01": "Neck1", "Head": "Head",  # Neck1 (parte de cima): leva a curva do pescoço até a cabeça
     "clavicle_l": "LeftShoulder", "upperarm_l": "LeftArm", "lowerarm_l": "LeftForeArm", "hand_l": "LeftHand",
     "clavicle_r": "RightShoulder", "upperarm_r": "RightArm", "lowerarm_r": "RightForeArm", "hand_r": "RightHand",
     "thigh_l": "LeftUpLeg", "calf_l": "LeftLeg", "foot_l": "LeftFoot", "ball_l": "LeftToeBase",

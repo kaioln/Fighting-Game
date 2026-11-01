@@ -27,3 +27,9 @@ Roupas de Nadja e Otto (cascas do corpo base pintadas com paleta chapada, a part
 ```bash
 blender -b --factory-startup --python build_outfits.py -- <pasta_dos_pacotes> <repo>/assets <pasta_previas>
 ```
+
+Golpes animados à mão (poses-chave com IK, assadas no esqueleto de 65 ossos):
+
+```bash
+blender -b --factory-startup --python keyanim.py -- <repo>/assets/animations/ual.glb <repo>/assets/animations/nadja_golpes.glb <pasta_previas>
+```

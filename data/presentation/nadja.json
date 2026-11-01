@@ -4,7 +4,8 @@
   "model": "characters/nadja.glb",
   "animations": [
     "animations/ual.glb",
-    "animations/kicks.glb"
+    "animations/kicks.glb",
+    "animations/nadja_golpes.glb"
   ],
   "scale_milli": 1000,
   "states": {
@@ -43,17 +44,15 @@
     "tech": "Hit_Chest",
     "win": "Idle_FoldArms_Loop",
     "idle": {
-      "clip": "CMU_Boxing_13_18",
+      "clip": "Nadja_Guarda",
       "loop": true
     },
     "run": "Sprint_Loop"
   },
   "moves": {
     "5LP": {
-      "clip": "Punch_Jab",
-      "contact": 13,
-      "from": 4,
-      "to": 40
+      "clip": "Nadja_Jab",
+      "contact": 4
     },
     "2LP": {
       "clip": "Punch_Jab",
@@ -68,10 +67,8 @@
       "to": 40
     },
     "5MP": {
-      "clip": "Punch_Cross",
-      "contact": 18,
-      "from": 8,
-      "to": 46
+      "clip": "Nadja_Direto",
+      "contact": 7
     },
     "2MP": {
       "clip": "Punch_Cross",
@@ -122,10 +119,8 @@
       "to": 136
     },
     "5MK": {
-      "clip": "CMU_Kick_74_05",
-      "from": 60,
-      "contact": 88,
-      "to": 118
+      "clip": "Nadja_ChuteMedio",
+      "contact": 10
     },
     "2MK": {
       "clip": "CMU_Kick_74_05",
